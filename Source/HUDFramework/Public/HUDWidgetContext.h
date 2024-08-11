@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CoreMinimal.h"
+
 #include "HUDWidgetContext.generated.h"
 
 /**
@@ -13,7 +15,7 @@ struct HUDFRAMEWORK_API FHUDWidgetContext
 	GENERATED_BODY()
 
 	FHUDWidgetContext() = default;
-	FHUDWidgetContext(UObject* InContextObject)
+	explicit FHUDWidgetContext(UObject* InContextObject)
 		: ContextObject(InContextObject)
 		, DataObject(nullptr)
 	{}
@@ -23,10 +25,10 @@ struct HUDFRAMEWORK_API FHUDWidgetContext
 		, DataObject(InDataObject)
 	{}
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UObject> ContextObject;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<const UObject> DataObject;
 };
 

@@ -5,6 +5,18 @@
 #include "HUDWidgetContext.generated.h"
 
 /**
+ * Base class for any widget context data
+ * Passed from gameplay layer to UI layer during widget initialization
+ * Subclass to add your own widget context data
+ * @see @FHUDWidgetContextHandle, @UHUDWidgetContextSubsystem, @InitializeWidget
+ */
+USTRUCT(BlueprintType)
+struct HUDFRAMEWORK_API FHUDWidgetContextBase
+{
+	GENERATED_BODY()
+};
+
+/**
  * Widget context data, passed from gameplay layer to UI layer during widget initialization
  * subclass to add your own widget context data
  * @todo: create empty base class FHUDWidgetContextBase
@@ -32,26 +44,7 @@ struct HUDFRAMEWORK_API FHUDWidgetContext
 	TObjectPtr<const UObject> DataObject;
 };
 
-template<>
-struct TStructOpsTypeTraits<FHUDWidgetContext> : public TStructOpsTypeTraitsBase2<FHUDWidgetContext>
-{
-	enum
-	{
-		WithCopy = true	
-	};
-};
-
-template <typename T>
-struct THUDWidgetContextTraits;
-
-/**
- * Add your type to check context types (FHUDWidgetContextHandle::IsA)
- */
-template <>
-struct THUDWidgetContextTraits<FHUDWidgetContext>
-{
-	static constexpr FStringView Type = TEXTVIEW("FHUDWidgetContext");
-};
+using FHUDWidgetContextProxy = FHUDWidgetContext;
 
 USTRUCT(BlueprintType)
 struct HUDFRAMEWORK_API FHUDWidgetContextHandle
@@ -61,16 +54,19 @@ struct HUDFRAMEWORK_API FHUDWidgetContextHandle
 	FHUDWidgetContextHandle() = default;
 	
 	FHUDWidgetContextHandle(const FHUDWidgetContextHandle& Other)
-		: Data(Other.Data)
+		: ContextData(Other.ContextData)
 		, ContextType(Other.ContextType)
 	{}
 
-	template <typename TContextType = FHUDWidgetContext, TEMPLATE_REQUIRES(TIsDerivedFrom<TContextType, FHUDWidgetContext>::IsDerived)>
+	template <typename TContextType = FHUDWidgetContext, TEMPLATE_REQUIRES(TIsDerivedFrom<TContextType, FHUDWidgetContextProxy>::IsDerived)>
 	explicit FHUDWidgetContextHandle(const TSharedRef<TContextType>& Context)
-		: Data(Context)
-		, ContextType(THUDWidgetContextTypeWrapper<TContextType>::Type)
+		: ContextData(Context)
+		, ContextType(TBaseStructure<TContextType>::Get())
 	{}
 
+	/** constructor for internal use only */
+	FHUDWidgetContextHandle(const UScriptStruct* ScriptStruct, const void* StructMemory);
+	
 	template <typename TContextType, typename ...TArgs>
 	static FHUDWidgetContextHandle CreateContext(TArgs&&... Args)
 	{
@@ -79,48 +75,70 @@ struct HUDFRAMEWORK_API FHUDWidgetContextHandle
 
 	bool IsValid() const
 	{
-		return Data.IsValid();
+		return ContextData.IsValid() && ContextType.IsValid();
 	}
 
-	template <typename TContextType>
-	bool IsA() const
+	/** */
+	template <typename TContextType, TEMPLATE_REQUIRES(TIsDerivedFrom<TContextType, FHUDWidgetContextProxy>::IsDerived)>
+	FORCEINLINE bool IsA() const
 	{
-		static_assert(THUDWidgetContextTypeWrapper<TContextType>::value, "Type is undefined. Define THUDWidgetContextTraits with your Widget Context type.");
-		
-		return ContextType == FName(THUDWidgetContextTypeWrapper<TContextType>::Type);
+		return IsA(TBaseStructure<TContextType>::Get());
 	}
 
-	FHUDWidgetContext& GetContext()
+	template <typename TContextType, TEMPLATE_REQUIRES(TIsDerivedFrom<TContextType, FHUDWidgetContextProxy>::IsDerived)>
+	FORCEINLINE bool IsDerivedFrom() const
 	{
-		return *Data;
-	}
-	
-	template <typename TContextType>
-	TContextType& GetContext()
-	{
-		return *StaticCastSharedPtr<TContextType>(Data);
+		return IsDerivedFrom(TBaseStructure<TContextType>::Get());
 	}
 
-	const FHUDWidgetContext& GetContext() const
+	FORCEINLINE bool IsA(const UScriptStruct* ScriptStruct) const
 	{
-		return *Data;
+		return ContextType.Get() == ScriptStruct;
+	}
+
+	FORCEINLINE bool IsDerivedFrom(const UScriptStruct* ScriptStruct) const
+	{
+		return ContextType.Get()->IsChildOf(ScriptStruct);
+	}
+
+	FORCEINLINE const UScriptStruct* GetContextType() const
+	{
+		return ContextType.Get();
 	}
 
 	template <typename TContextType>
 	const TContextType& GetContext() const
 	{
-		return *StaticCastSharedPtr<TContextType>(Data);
+		check(IsDerivedFrom<TContextType>());
+		return *StaticCastSharedPtr<TContextType>(ContextData);
+	}
+
+	template <typename TContextType>
+	TContextType& GetContext()
+	{
+		check(IsDerivedFrom<TContextType>());
+		return *StaticCastSharedPtr<TContextType>(ContextData);
+	}
+
+	FHUDWidgetContextProxy& GetContext()
+	{
+		return *ContextData;
+	}
+	
+	const FHUDWidgetContextProxy& GetContext() const
+	{
+		return *ContextData;
 	}
 
 	/** Comparison operator */
 	bool operator==(const FHUDWidgetContextHandle& Other) const
 	{
-		if (Data.IsValid() != Other.Data.IsValid())
+		if (ContextData.IsValid() != Other.ContextData.IsValid())
 		{
 			return false;
 		}
 		
-		if (Data.Get() != Other.Data.Get())
+		if (ContextData.Get() != Other.ContextData.Get())
 		{
 			return false;
 		}
@@ -134,23 +152,10 @@ struct HUDFRAMEWORK_API FHUDWidgetContextHandle
 	}
 
 private:
-
-	template <typename T, typename U = void>
-	struct THUDWidgetContextTypeWrapper : std::false_type
-	{
-		static constexpr FStringView Type = TEXTVIEW("Unknown");
-	};
-
-	template <typename T>
-	struct THUDWidgetContextTypeWrapper<T, std::void_t<decltype(THUDWidgetContextTraits<T>::Type)>> : std::true_type
-	{
-		static constexpr FStringView Type = THUDWidgetContextTraits<T>::Type;
-	};
-
+	
 	// @todo: custom serialization
-	// @todo: Replace with FHUDWidgetContextBase
-	TSharedPtr<FHUDWidgetContext> Data;
-	FName ContextType;
+	TSharedPtr<FHUDWidgetContextProxy> ContextData;
+	TWeakObjectPtr<const UScriptStruct> ContextType;
 };
 
 template <>

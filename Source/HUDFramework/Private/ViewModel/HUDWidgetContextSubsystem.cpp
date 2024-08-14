@@ -151,15 +151,6 @@ void UHUDWidgetContextSubsystem::InitializeWidget(UUserWidget* UserWidget, const
 	{
 		InitializeWidgetTree(UserWidget);
 	}
-#if WITH_EDITOR && 0
-	else
-	{
-		const FString WidgetTree = UHUDLayoutBlueprintLibrary::ConstructWidgetTreeString(UserWidget);
-		UE_LOG(LogHUDFramework, Error,  TEXT("%s Trying to initialize widget that is a part of another widget tree, that is being initialized.\n")
-										TEXT("This happens if InitializeWidget is called in InitializeWidgetTree execution graph. Consider calling RegisterWidget instead.\n")
-										TEXT("Widget Tree: %s"), *FString(__FUNCTION__), *WidgetTree);
-	}
-#endif
 }
 
 bool UHUDWidgetContextSubsystem::IsPartOfActiveWidgetTree(const UUserWidget* UserWidget) const

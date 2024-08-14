@@ -3,19 +3,20 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "Components/DynamicEntryBoxBase.h"
+#include "HUDLayoutExtension.h"
 
 #include "HUDLayoutSlotWidget.generated.h"
 
-class FHUDLayoutExtension;
-struct FHUDLayoutExtensionHandle;
+struct FHUDWidgetContextHandle;
 struct FHUDLayoutSlotHandle;
+struct FHUDLayoutExtensionRequest;
 
 UCLASS()
 class HUDFRAMEWORK_API UHUDLayoutSlotWidget: public UDynamicEntryBoxBase
 {
 	GENERATED_BODY()
 	
-	DECLARE_DYNAMIC_DELEGATE_TwoParams(FConfigureWidget, UUserWidget*, Widget, const UObject*, DataPayload);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FConfigureWidget, UUserWidget*, Widget, const FHUDWidgetContextHandle&, WidgetContext);
 public:
 
 	UHUDLayoutSlotWidget(const FObjectInitializer& Initializer);

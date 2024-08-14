@@ -113,12 +113,7 @@ UUserWidget* UHUDLayoutSlotWidget::AddExtension(const FHUDLayoutExtensionRequest
 	
 	if (ConfigureWidget.IsBound())
 	{
-		const UObject* DataObject = nullptr;
-		if (Request.WidgetContext.IsValid())
-		{
-			DataObject = Request.WidgetContext.GetContext<FHUDWidgetContext>().DataObject;
-		}
-		ConfigureWidget.Execute(Widget, DataObject);
+		ConfigureWidget.Execute(Widget, Request.WidgetContext);
 	}
 	ActiveExtensions.Add(Request.Handle, Widget);
 

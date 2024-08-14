@@ -39,36 +39,49 @@ public:
 	/** Remove widget from the layer for given player */
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "HUD")
 	static void PopContentFromLayer(const APlayerController* PlayerController, UPARAM(meta = (Categories = "HUD.Layer")) FGameplayTag LayerTag, UCommonActivatableWidget* Widget);
-
-	UFUNCTION(BlueprintCallable, BlueprintCosmetic, DisplayName = "Set Widget Context")
-	static void SetWidgetContext(UUserWidget* UserWidget, UObject* Context, const UObject* DataPayload);
-
-	UFUNCTION(BlueprintCallable, BlueprintCosmetic, DisplayName = "Set Widget Context (Handle)")
+	
+	UE_DEPRECATED(5.4, "")
+	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "HUD", DisplayName = "Set Widget Context (Handle)", meta = (DeprecatedFunction, DeprecationMessage = "Use InitializeWidgetFromHandle instead."))
 	static void SetWidgetContext_FromHandle(UUserWidget* UserWidget, const FHUDWidgetContextHandle& ContextHandle);
+	
+	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "HUD", DisplayName = "Initialize Widget From Context Handle")
+	static void InitializeWidgetFromHandle(UUserWidget* UserWidget, const FHUDWidgetContextHandle& ContextHandle);
 
-	UFUNCTION(BlueprintCallable, BlueprintCosmetic, DisplayName = "Initialize Widget")
-	static void InitializeWidget(UUserWidget* UserWidget, UObject* Context, const UObject* DataPayload);
+	UFUNCTION(BlueprintPure, BlueprintCosmetic, Category = "HUD")
+	static FHUDWidgetContextHandle GetWidgetContextHandle(const UUserWidget* UserWidget);
 
-	UFUNCTION(BlueprintCallable, BlueprintCosmetic, DisplayName = "Initialize Widget (Handle)")
-	static void InitializeWidget_FromHandle(UUserWidget* UserWidget, const FHUDWidgetContextHandle& ContextHandle);
+	// custom blueprint graph nodes
+	
+	UFUNCTION(BlueprintCallable, CustomThunk, Category = "HUD", DisplayName = "Initialize Widget From Context", meta = (CustomStructureParam = "WidgetContext", BlueprintInternalUseOnly = "true"))
+	static void K2_InitializeWidget(UPARAM(Required) UUserWidget* UserWidget, const int32& WidgetContext);
 
-	UFUNCTION(BlueprintPure, BlueprintCosmetic, DisplayName = "Get Widget Context")
-	static FHUDWidgetContextHandle GetWidgetContext(const UUserWidget* UserWidget);
+	UFUNCTION(BlueprintPure, CustomThunk, Category = "HUD", DisplayName = "Get Widget Context", meta = (CustomStructureParam = "WidgetContext", BlueprintInternalUseOnly = "true"))
+	static void K2_GetWidgetContext(UPARAM(Required) UUserWidget* UserWidget, int32& WidgetContext);
+	
+	UFUNCTION(BlueprintPure, CustomThunk, Category = "HUD", DisplayName = "To Widget Context (Handle)", meta = (CustomStructureParam = "WidgetContext", BlueprintInternalUseOnly = "true"))
+	static void K2_GetWidgetContextFromHandle(const FHUDWidgetContextHandle& ContextHandle, int32& WidgetContext);
 
-	// @todo: node that creates custom widget context
+	UFUNCTION(BlueprintPure, CustomThunk, Category = "HUD", DisplayName = "To Handle (Widget Context)", meta = (BlueprintAutocast, CustomStructureParam = "WidgetContext", BlueprintInternalUseOnly = "true"))
+	static FHUDWidgetContextHandle Conv_WidgetContextToWidgetContextHandle(const int32& WidgetContext);
 	
 protected:
-
+	
+	DECLARE_FUNCTION(execK2_InitializeWidget);
+	DECLARE_FUNCTION(execK2_GetWidgetContext);
+	DECLARE_FUNCTION(execK2_GetWidgetContextFromHandle);
+	DECLARE_FUNCTION(execConv_WidgetContextToWidgetContextHandle);
+	
 	// internal functions, blueprint usage only
 
 	UFUNCTION(BlueprintPure, DisplayName = "Is Valid (Widget Context)")
 	static bool IsValid_WidgetContext(const FHUDWidgetContextHandle& WidgetContext);
-	
-	UFUNCTION(BlueprintPure, DisplayName = "Get Context Object (Widget Context)")
-	static UObject* GetContextObject_WidgetContext(const FHUDWidgetContextHandle& WidgetContext);
 
-	UFUNCTION(BlueprintPure, DisplayName = "Get Data Object (Widget Context)")
-	static const UObject* GetDataObject_WidgetContext(const FHUDWidgetContextHandle& WidgetContext);
+	UFUNCTION(BlueprintPure, DisplayName = "Is Derived From (Widget Context)")
+	static bool IsDerivedFrom_WidgetContext(const FHUDWidgetContextHandle& WidgetContext, UScriptStruct* ContextType);
+
+	UE_DEPRECATED(5.4, "")
+	UFUNCTION(BlueprintPure, DisplayName = "Get Context Object (Widget Context)", meta = (DeprecatedFunction, DeprecationMessage = "Use HUDWidgetContext explicitly."))
+	static UObject* GetContextObject_WidgetContext(const FHUDWidgetContextHandle& WidgetContext);
 	
 	/** @return whether given layout slot handle is valid */
 	UFUNCTION(BlueprintPure, DisplayName = "Is Valid (Slot Handle)")

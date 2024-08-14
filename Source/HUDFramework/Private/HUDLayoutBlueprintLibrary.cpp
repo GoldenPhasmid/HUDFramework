@@ -7,7 +7,10 @@
 #include "HUDPrimaryLayout.h"
 #include "ViewModel/HUDWidgetContextSubsystem.h"
 #include "CommonActivatableWidget.h"
+#include "Blueprint/BlueprintExceptionInfo.h"
 #include "Blueprint/UserWidget.h"
+
+#define LOCTEXT_NAMESPACE "HUDFramework"
 
 FString UHUDLayoutBlueprintLibrary::ConstructWidgetTreeString(const UUserWidget* UserWidget)
 {
@@ -85,14 +88,6 @@ void UHUDLayoutBlueprintLibrary::PopContentFromLayer(const APlayerController* Pl
 	}
 }
 
-void UHUDLayoutBlueprintLibrary::SetWidgetContext(UUserWidget* UserWidget, UObject* Context, const UObject* DataPayload)
-{
-	if (UHUDWidgetContextSubsystem* Subsystem = UHUDWidgetContextSubsystem::Get(UserWidget))
-	{
-		Subsystem->RegisterWidget(UserWidget, FHUDWidgetContextHandle::CreateContext<FHUDWidgetContext>(Context, DataPayload));
-	}
-}
-
 void UHUDLayoutBlueprintLibrary::SetWidgetContext_FromHandle(UUserWidget* UserWidget, const FHUDWidgetContextHandle& ContextHandle)
 {
 	if (UHUDWidgetContextSubsystem* Subsystem = UHUDWidgetContextSubsystem::Get(UserWidget))
@@ -101,15 +96,7 @@ void UHUDLayoutBlueprintLibrary::SetWidgetContext_FromHandle(UUserWidget* UserWi
 	}
 }
 
-void UHUDLayoutBlueprintLibrary::InitializeWidget(UUserWidget* UserWidget, UObject* Context, const UObject* DataPayload)
-{
-	if (UHUDWidgetContextSubsystem* Subsystem = UHUDWidgetContextSubsystem::Get(UserWidget))
-	{
-		Subsystem->InitializeWidget(UserWidget, FHUDWidgetContextHandle::CreateContext<FHUDWidgetContext>(Context, DataPayload));
-	}
-}
-
-void UHUDLayoutBlueprintLibrary::InitializeWidget_FromHandle(UUserWidget* UserWidget, const FHUDWidgetContextHandle& ContextHandle)
+void UHUDLayoutBlueprintLibrary::InitializeWidgetFromHandle(UUserWidget* UserWidget, const FHUDWidgetContextHandle& ContextHandle)
 {
 	if (UHUDWidgetContextSubsystem* Subsystem = UHUDWidgetContextSubsystem::Get(UserWidget))
 	{
@@ -117,7 +104,7 @@ void UHUDLayoutBlueprintLibrary::InitializeWidget_FromHandle(UUserWidget* UserWi
 	}
 }
 
-FHUDWidgetContextHandle UHUDLayoutBlueprintLibrary::GetWidgetContext(const UUserWidget* UserWidget)
+FHUDWidgetContextHandle UHUDLayoutBlueprintLibrary::GetWidgetContextHandle(const UUserWidget* UserWidget)
 {
 	if (UHUDWidgetContextSubsystem* Subsystem = UHUDWidgetContextSubsystem::Get(UserWidget))
 	{
@@ -127,9 +114,165 @@ FHUDWidgetContextHandle UHUDLayoutBlueprintLibrary::GetWidgetContext(const UUser
 	return {};
 }
 
+void UHUDLayoutBlueprintLibrary::K2_InitializeWidget(UUserWidget* UserWidget, const int32& WidgetContext)
+{
+	checkNoEntry();
+}
+
+void UHUDLayoutBlueprintLibrary::K2_GetWidgetContext(UUserWidget* UserWidget, int32& WidgetContext)
+{
+	checkNoEntry();
+}
+
+void UHUDLayoutBlueprintLibrary::K2_GetWidgetContextFromHandle(const FHUDWidgetContextHandle& ContextHandle, int32& WidgetContext)
+{
+	checkNoEntry();
+}
+
+FHUDWidgetContextHandle UHUDLayoutBlueprintLibrary::Conv_WidgetContextToWidgetContextHandle(const int32& WidgetContext)
+{
+	checkNoEntry();
+	return {};
+}
+
+DEFINE_FUNCTION(UHUDLayoutBlueprintLibrary::execK2_InitializeWidget)
+{
+	P_GET_OBJECT(UUserWidget, UserWidget);
+
+	Stack.MostRecentPropertyAddress = nullptr;
+	Stack.StepCompiledIn<FStructProperty>(nullptr);
+
+	const void* ContextData = Stack.MostRecentPropertyAddress;
+	const FStructProperty* ContextProperty = CastField<FStructProperty>(Stack.MostRecentProperty);
+
+	P_FINISH
+	P_NATIVE_BEGIN
+	
+	if (ContextData == nullptr || ContextProperty == nullptr)
+	{
+		FBlueprintExceptionInfo Exception{EBlueprintExceptionType::AbortExecution, LOCTEXT("K2_InitializeWidget_InvalidMemory", "")};
+		FBlueprintCoreDelegates::ThrowScriptException(P_THIS, Stack, Exception);
+		return;
+	}
+	
+	UScriptStruct* ContextType = Cast<UScriptStruct>(ContextProperty->Struct);
+	if (!ContextType->IsChildOf(FHUDWidgetContextProxy::StaticStruct()))
+	{
+		FBlueprintExceptionInfo Exception{EBlueprintExceptionType::AbortExecution, LOCTEXT("GetWidgetContextFromHandle_InvalidType", "")};
+		FBlueprintCoreDelegates::ThrowScriptException(P_THIS, Stack, Exception);
+		return;
+	}
+	
+	const FHUDWidgetContextHandle ContextHandle{ContextType, ContextData};
+	InitializeWidgetFromHandle(UserWidget, ContextHandle);
+	P_NATIVE_END
+}
+
+DEFINE_FUNCTION(UHUDLayoutBlueprintLibrary::execConv_WidgetContextToWidgetContextHandle)
+{
+	Stack.MostRecentPropertyAddress = nullptr;
+	Stack.StepCompiledIn<FStructProperty>(nullptr);
+
+	const void* ContextData = Stack.MostRecentPropertyAddress;
+	const FStructProperty* ContextProperty = CastField<FStructProperty>(Stack.MostRecentProperty);
+
+	P_FINISH
+	P_NATIVE_BEGIN
+	if (ContextData == nullptr || ContextProperty == nullptr)
+	{
+		FBlueprintExceptionInfo Exception{EBlueprintExceptionType::AbortExecution, LOCTEXT("K2_InitializeWidget_InvalidMemory", "")};
+		FBlueprintCoreDelegates::ThrowScriptException(P_THIS, Stack, Exception);
+		return;
+	}
+	
+	UScriptStruct* ContextType = Cast<UScriptStruct>(ContextProperty->Struct);
+	if (!ContextType->IsChildOf(FHUDWidgetContextProxy::StaticStruct()))
+	{
+		FBlueprintExceptionInfo Exception{EBlueprintExceptionType::AbortExecution, LOCTEXT("GetWidgetContextFromHandle_InvalidType", "")};
+		FBlueprintCoreDelegates::ThrowScriptException(P_THIS, Stack, Exception);
+		return;
+	}
+
+	*(FHUDWidgetContextHandle*)RESULT_PARAM = FHUDWidgetContextHandle{ContextType, ContextData};
+	P_NATIVE_END
+}
+
+DEFINE_FUNCTION(UHUDLayoutBlueprintLibrary::execK2_GetWidgetContext)
+{
+	P_GET_OBJECT(UUserWidget, UserWidget);
+
+	Stack.MostRecentPropertyAddress = nullptr;
+	Stack.StepCompiledIn<FStructProperty>(nullptr);
+
+	void* OutData = Stack.MostRecentPropertyAddress;
+	const FStructProperty* ContextProperty = CastField<FStructProperty>(Stack.MostRecentProperty);
+
+	P_FINISH
+	P_NATIVE_BEGIN
+	if (OutData == nullptr || ContextProperty == nullptr)
+	{
+		FBlueprintExceptionInfo Exception{EBlueprintExceptionType::AbortExecution, LOCTEXT("GetWidgetContextFromHandle_InvalidMemory", "")};
+		FBlueprintCoreDelegates::ThrowScriptException(P_THIS, Stack, Exception);
+		return;
+	}
+
+	FHUDWidgetContextHandle ContextHandle = GetWidgetContextHandle(UserWidget);
+	const UScriptStruct* ContextType = Cast<UScriptStruct>(ContextProperty->Struct);
+	if (!ContextHandle.IsDerivedFrom(ContextType))
+	{
+		FBlueprintExceptionInfo Exception{EBlueprintExceptionType::AbortExecution, LOCTEXT("GetWidgetContextFromHandle_InvalidType", "")};
+		FBlueprintCoreDelegates::ThrowScriptException(P_THIS, Stack, Exception);
+		return;
+	}
+	
+	ContextType->CopyScriptStruct(OutData, &ContextHandle.GetContext());
+	P_NATIVE_END
+}
+
+DEFINE_FUNCTION(UHUDLayoutBlueprintLibrary::execK2_GetWidgetContextFromHandle)
+{
+	P_GET_STRUCT_REF(FHUDWidgetContextHandle, ContextHandle);
+
+	if (!ContextHandle.IsValid())
+	{
+		return;
+	}
+
+	Stack.MostRecentPropertyAddress = nullptr;
+	Stack.StepCompiledIn<FStructProperty>(nullptr);
+
+	void* OutContextData = Stack.MostRecentPropertyAddress;
+	const FStructProperty* OutContextProperty = CastField<FStructProperty>(Stack.MostRecentProperty);
+	
+	P_FINISH
+	P_NATIVE_BEGIN
+	if (OutContextData == nullptr || OutContextProperty == nullptr)
+	{
+		FBlueprintExceptionInfo Exception{EBlueprintExceptionType::AbortExecution, LOCTEXT("GetWidgetContextFromHandle_Invalid", "")};
+		FBlueprintCoreDelegates::ThrowScriptException(P_THIS, Stack, Exception);
+		return;
+	}
+	
+	const UScriptStruct* ContextType = Cast<UScriptStruct>(OutContextProperty->Struct);
+	if (!ContextHandle.IsDerivedFrom(ContextType))
+	{
+		FBlueprintExceptionInfo Exception{EBlueprintExceptionType::AbortExecution, LOCTEXT("GetWidgetContextFromHandle_InvalidType", "")};
+		FBlueprintCoreDelegates::ThrowScriptException(P_THIS, Stack, Exception);
+		return;
+	}
+
+	ContextType->CopyScriptStruct(OutContextData, &ContextHandle.GetContext());
+	P_NATIVE_END
+}
+
 bool UHUDLayoutBlueprintLibrary::IsValid_WidgetContext(const FHUDWidgetContextHandle& WidgetContext)
 {
 	return WidgetContext.IsValid();
+}
+
+bool UHUDLayoutBlueprintLibrary::IsDerivedFrom_WidgetContext(const FHUDWidgetContextHandle& WidgetContext, UScriptStruct* ContextType)
+{
+	return WidgetContext.IsDerivedFrom(ContextType);
 }
 
 UObject* UHUDLayoutBlueprintLibrary::GetContextObject_WidgetContext(const FHUDWidgetContextHandle& WidgetContext)
@@ -141,17 +284,6 @@ UObject* UHUDLayoutBlueprintLibrary::GetContextObject_WidgetContext(const FHUDWi
 
 	const FHUDWidgetContext& Context = WidgetContext.GetContext<FHUDWidgetContext>();
 	return Context.ContextObject;
-}
-
-const UObject* UHUDLayoutBlueprintLibrary::GetDataObject_WidgetContext(const FHUDWidgetContextHandle& WidgetContext)
-{
-	if (!WidgetContext.IsValid())
-	{
-		return nullptr;
-	}
-
-	const FHUDWidgetContext& Context = WidgetContext.GetContext<FHUDWidgetContext>();
-	return Context.DataObject;
 }
 
 bool UHUDLayoutBlueprintLibrary::IsValid_SlotHandle(FHUDLayoutSlotHandle& Handle)
@@ -181,3 +313,5 @@ void UHUDLayoutBlueprintLibrary::Unregister_ExtensionHandle(FHUDLayoutExtensionH
 		Subsystem->UnregisterLayoutExtension(Handle);
 	}
 }
+
+#undef LOCTEXT_NAMESPACE

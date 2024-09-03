@@ -23,6 +23,11 @@
 			"Name": "HUDFrameworkNodes",
 			"Type": "UncookedOnly",
 			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "HUDFrameworkGameFeatureActions",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
 		}
 	],
 	"Plugins": [
@@ -40,6 +45,14 @@
 		},
 		{
 			"Name": "AsyncMixin",
+			"Enabled": true
+		},
+		{
+			"Name": "GameFeatures",
+			"Enabled": true
+		},
+		{
+			"Name": "GameExperience",
 			"Enabled": true
 		}
 	]

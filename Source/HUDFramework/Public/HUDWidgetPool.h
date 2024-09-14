@@ -4,13 +4,14 @@
 #include "Blueprint/WidgetTree.h"
 #include "Slate/SObjectWidget.h"
 
-#include "HUDUserWidgetPool.generated.h"
+#include "HUDWidgetPool.generated.h"
 
 class APlayerController;
 
 /**
  * HUD Framework: this widget pool has identical functionality to FUserWidgetPool.
- * The main difference is it gives caller an opportunity to initialize user widget after it was initialized but before constructed by passing WidgetInitializeFunc
+ * @note	This version of the widget pool ALWAYS releases slate widgets
+ * @note	caller has opportunity to initialize user widget after it was initialized but before constructed by passing WidgetInitializeFunc
  * 
  * Pools UUserWidget instances to minimize UObject and SWidget allocations for UMG elements with dynamic entries.
  *
@@ -20,18 +21,18 @@ class APlayerController;
  * WARNING: Be sure to release the pool's Slate widgets within the owning widget's ReleaseSlateResources call to prevent leaking due to circular references
  *		Otherwise the cached references to SObjectWidgets will keep the UUserWidgets - and all that they reference - alive
  *
- * @see UListView
- * @see UDynamicEntryBox
+ * @see		UListView
+ * @see		UDynamicEntryBox
  */
 USTRUCT()
-struct HUDFRAMEWORK_API FHUDUserWidgetPool
+struct HUDFRAMEWORK_API FHUDWidgetPool
 {
 	GENERATED_BODY();
 
 public:
-	FHUDUserWidgetPool() = default;
-	FHUDUserWidgetPool(UWidget& InOwningWidget);
-	~FHUDUserWidgetPool();
+	FHUDWidgetPool() = default;
+	FHUDWidgetPool(UWidget& InOwningWidget);
+	~FHUDWidgetPool();
 
 	/** In the case that you don't have an owner widget, you should set a world to your pool, or it won't be able to construct widgets. */
 	void SetWorld(UWorld* OwningWorld);
@@ -91,14 +92,14 @@ public:
 		return AddActiveWidgetInternal(WidgetClass, InitializeWidgetFunc, ConstructWidgetFunc);
 	}
 
-	/** Return a widget object to the pool, allowing it to be reused in the future */
-	void Release(UUserWidget* Widget, bool bReleaseSlate = false);
+	/** Return a widget UObject to the pool, allowing it to be reused in the future. Slate widget is ALWAYS destroyed */
+	void Release(UUserWidget* Widget);
 
-	/** Return a widget object to the pool, allowing it to be reused in the future */
-	void Release(TArray<UUserWidget*> Widgets, bool bReleaseSlate = false);
+	/** Return a widget object to the pool, allowing it to be reused in the future. Slate widget is ALWAYS destroyed */
+	void Release(TArray<UUserWidget*> Widgets);
 
-	/** Returns all active widget objects to the inactive pool and optionally destroys all cached underlying slate widgets. */
-	void ReleaseAll(bool bReleaseSlate = false);
+	/** Returns all active widget UObjects to the inactive pool. ALWAYS destroys all cached underlying slate widgets. */
+	void ReleaseAll();
 
 	/** Full reset of all created widget objects (and any cached underlying slate) */
 	void ResetPool();

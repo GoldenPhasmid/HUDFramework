@@ -1,27 +1,27 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "HUDUserWidgetPool.h"
+#include "HUDWidgetPool.h"
 
-FHUDUserWidgetPool::FHUDUserWidgetPool(UWidget& InOwningWidget)
+FHUDWidgetPool::FHUDWidgetPool(UWidget& InOwningWidget)
 	: OwningWidget(&InOwningWidget)
 {}
 
-FHUDUserWidgetPool::~FHUDUserWidgetPool()
+FHUDWidgetPool::~FHUDWidgetPool()
 {
 	ResetPool();
 }
 
-void FHUDUserWidgetPool::SetWorld(UWorld* InOwningWorld)
+void FHUDWidgetPool::SetWorld(UWorld* InOwningWorld)
 {
 	OwningWorld = InOwningWorld;
 }
 
-void FHUDUserWidgetPool::SetDefaultPlayerController(APlayerController* InDefaultPlayerController)
+void FHUDWidgetPool::SetDefaultPlayerController(APlayerController* InDefaultPlayerController)
 {
 	DefaultPlayerController = InDefaultPlayerController;
 }
 
-void FHUDUserWidgetPool::RebuildWidgets()
+void FHUDWidgetPool::RebuildWidgets()
 {
 	for (UUserWidget* Widget : ActiveWidgets)
 	{
@@ -29,13 +29,13 @@ void FHUDUserWidgetPool::RebuildWidgets()
 	}
 }
 
-void FHUDUserWidgetPool::AddReferencedObjects(FReferenceCollector& Collector)
+void FHUDWidgetPool::AddReferencedObjects(FReferenceCollector& Collector)
 {
 	Collector.AddReferencedObjects<UUserWidget>(ActiveWidgets, OwningWidget.Get());
 	Collector.AddReferencedObjects<UUserWidget>(InactiveWidgets, OwningWidget.Get());
 }
 
-void FHUDUserWidgetPool::Release(UUserWidget* Widget, bool bReleaseSlate)
+void FHUDWidgetPool::Release(UUserWidget* Widget)
 {
 	if (Widget != nullptr)
 	{
@@ -45,41 +45,35 @@ void FHUDUserWidgetPool::Release(UUserWidget* Widget, bool bReleaseSlate)
 			InactiveWidgets.Push(Widget);
 			ActiveWidgets.RemoveAt(ActiveWidgetIdx);
 
-			if (bReleaseSlate)
-			{
-				CachedSlateByWidgetObject.Remove(Widget);
-			}
+			CachedSlateByWidgetObject.Remove(Widget);
 		}
 	}
 }
 
-void FHUDUserWidgetPool::Release(TArray<UUserWidget*> Widgets, bool bReleaseSlate)
+void FHUDWidgetPool::Release(TArray<UUserWidget*> Widgets)
 {
-	for (UUserWidget* Widget : Widgets)
+	for (int32 Index = Widgets.Num() - 1; Index >= 0; --Index)
 	{
-		Release(Widget, bReleaseSlate);
+		Release(Widgets[Index]);
 	}
 }
 
-void FHUDUserWidgetPool::ReleaseAll(bool bReleaseSlate)
+void FHUDWidgetPool::ReleaseAll()
 {
 	InactiveWidgets.Append(ActiveWidgets);
 	ActiveWidgets.Empty();
 
-	if (bReleaseSlate)
-	{
-		CachedSlateByWidgetObject.Reset();
-	}
+	CachedSlateByWidgetObject.Reset();
 }
 
-void FHUDUserWidgetPool::ResetPool()
+void FHUDWidgetPool::ResetPool()
 {
 	InactiveWidgets.Reset();
 	ActiveWidgets.Reset();
 	CachedSlateByWidgetObject.Reset();
 }
 
-void FHUDUserWidgetPool::ReleaseInactiveSlateResources()
+void FHUDWidgetPool::ReleaseInactiveSlateResources()
 {
 	for (UUserWidget* InactiveWidget : InactiveWidgets)
 	{
@@ -87,7 +81,7 @@ void FHUDUserWidgetPool::ReleaseInactiveSlateResources()
 	}
 }
 
-void FHUDUserWidgetPool::ReleaseAllSlateResources()
+void FHUDWidgetPool::ReleaseAllSlateResources()
 {
 	CachedSlateByWidgetObject.Reset();
 }

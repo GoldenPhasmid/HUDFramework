@@ -5,6 +5,7 @@
 #include "HUDLayoutBlueprintLibrary.h"
 #include "HUDLayoutExtension.h"
 #include "HUDLayoutSubsystem.h"
+#include "HUDPrimaryLayout.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "GameFramework/HUD.h"
 
@@ -97,13 +98,17 @@ void UGameFeatureAction_AddHUDLayout::AddWidgets(const APlayerController* Player
 	UHUDLayoutSubsystem* LayoutSubsystem = PlayerController->GetGameInstance()->GetSubsystem<UHUDLayoutSubsystem>();
 	check(LayoutSubsystem);
 
-	for (const FHUDLayoutEntry& Layout: Layouts)
+	if (UHUDPrimaryLayout* PrimaryLayout = UHUDLayoutBlueprintLibrary::GetPrimaryLayout(PlayerController))
 	{
-		check(Layout.LayoutClass.Get());
-		ExtensionData.LayoutWidgets.Emplace(UHUDLayoutBlueprintLibrary::PushContentToLayer(
-			PlayerController, Layout.LayerTag, Layout.LayoutClass.Get()), Layout.LayerTag
-		);
+		for (const FHUDLayoutEntry& Layout: Layouts)
+		{
+			check(Layout.LayoutClass.Get());
+			ExtensionData.LayoutWidgets.Emplace(PrimaryLayout->PushWidgetToLayer<UCommonActivatableWidget>(
+				Layout.LayerTag, Layout.LayoutClass.Get()), Layout.LayerTag
+			);
+		}
 	}
+
 
 	ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer();
 	for (const FHUDLayoutExtensionEntry& Extension: Extensions)
@@ -120,10 +125,13 @@ void UGameFeatureAction_AddHUDLayout::RemoveWidgets(const APlayerController* Pla
 	check(PlayerController);
 	UHUDLayoutSubsystem* LayoutSubsystem = PlayerController->GetGameInstance()->GetSubsystem<UHUDLayoutSubsystem>();
 	check(LayoutSubsystem);
-	
-	for (auto & [Layout, LayerTag]: ExtensionData.LayoutWidgets)
+
+	if (UHUDPrimaryLayout* PrimaryLayout = UHUDLayoutBlueprintLibrary::GetPrimaryLayout(PlayerController))
 	{
-		UHUDLayoutBlueprintLibrary::PopContentFromLayer(PlayerController, LayerTag, Layout);
+		for (const auto& [Widget, LayerTag]: ExtensionData.LayoutWidgets)
+		{
+			PrimaryLayout->PopWidgetFromLayer(LayerTag, Widget);
+		}
 	}
 	ExtensionData.LayoutWidgets.Empty();
 	

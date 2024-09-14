@@ -288,9 +288,9 @@ FHUDLayoutExtensionHandle UHUDLayoutSubsystem::K2_RegisterLayoutExtension(const 
 	return RegisterLayoutExtension(SlotTag, WidgetClass, Player->GetLocalPlayer());
 }
 
-FHUDLayoutExtensionHandle UHUDLayoutSubsystem::K2_RegisterLayoutExtensionWithContext(const APlayerController* Player, const FGameplayTag& SlotTag, TSubclassOf<UUserWidget> WidgetClass, UObject* Context, UObject* DataPayload)
+FHUDLayoutExtensionHandle UHUDLayoutSubsystem::K2_RegisterLayoutExtensionWithContext(const APlayerController* Player, const FGameplayTag& SlotTag, TSubclassOf<UUserWidget> WidgetClass, const FHUDWidgetContextHandle& Context)
 {
-	return RegisterLayoutExtensionWithContext(SlotTag, WidgetClass, Player->GetLocalPlayer(), FHUDWidgetContextHandle::CreateContext<FHUDWidgetContext>(Context, DataPayload));
+	return RegisterLayoutExtensionWithContext(SlotTag, WidgetClass, Player->GetLocalPlayer(), Context);
 }
 
 void UHUDLayoutSubsystem::K2_UnregisterLayoutExtension(FHUDLayoutExtensionHandle& Handle)

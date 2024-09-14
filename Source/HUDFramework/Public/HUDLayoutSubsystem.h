@@ -75,7 +75,7 @@ protected:
 	FHUDLayoutExtensionHandle K2_RegisterLayoutExtension(const APlayerController* Player, const FGameplayTag& SlotTag, TSubclassOf<UUserWidget> WidgetClass);
 
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, DisplayName = "Register Layout Extension (Widget With Context)")
-	FHUDLayoutExtensionHandle K2_RegisterLayoutExtensionWithContext(const APlayerController* Player, const FGameplayTag& SlotTag, TSubclassOf<UUserWidget> WidgetClass, UObject* Context, UObject* DataPayload);
+	FHUDLayoutExtensionHandle K2_RegisterLayoutExtensionWithContext(const APlayerController* Player, const FGameplayTag& SlotTag, TSubclassOf<UUserWidget> WidgetClass, const FHUDWidgetContextHandle& Context);
 
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, DisplayName = "Unregister Layout Extension")
 	void K2_UnregisterLayoutExtension(UPARAM(ref) FHUDLayoutExtensionHandle& Handle);

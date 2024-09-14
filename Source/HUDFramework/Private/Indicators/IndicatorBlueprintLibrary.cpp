@@ -30,14 +30,14 @@ void UIndicatorBlueprintLibrary::AddIndicator_ActorWithContext(const UIndicatorD
 {
 	GET_INDICATOR_MANAGER_OR_RETURN(OwnerActor);
 
-	IndicatorManager->AddIndicatorWithContext(Descriptor, OwnerActor, FHUDWidgetContextHandle::CreateContext<FHUDWidgetContext>(ContextObject, Descriptor));
+	IndicatorManager->AddIndicatorWithContext(Descriptor, OwnerActor, FHUDWidgetContextHandle::CreateContext<FIndicatorWidgetContext>(ContextObject, Descriptor));
 }
 
 void UIndicatorBlueprintLibrary::AddIndicator_ComponentWithContext(const UIndicatorDescriptor* Descriptor, const USceneComponent* Component, FName SocketName, UObject* ContextObject)
 {
 	GET_INDICATOR_MANAGER_OR_RETURN(Component);
 
-	IndicatorManager->AddIndicatorWithContext(Descriptor, Component, SocketName, FHUDWidgetContextHandle::CreateContext<FHUDWidgetContext>(ContextObject, Descriptor));
+	IndicatorManager->AddIndicatorWithContext(Descriptor, Component, SocketName, FHUDWidgetContextHandle::CreateContext<FIndicatorWidgetContext>(ContextObject, Descriptor));
 }
 
 void UIndicatorBlueprintLibrary::RemoveIndicator_Actor(const AActor* OwnerActor)

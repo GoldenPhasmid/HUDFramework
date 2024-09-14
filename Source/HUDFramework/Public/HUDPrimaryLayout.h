@@ -3,12 +3,14 @@
 #include "CoreMinimal.h"
 #include "CommonUserWidget.h"
 #include "GameplayTagContainer.h"
+#include "HUDWidgetContext.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 #include "Widgets/CommonActivatableWidgetContainer.h"
 
 #include "HUDPrimaryLayout.generated.h"
 
+struct FHUDWidgetContextHandle;
 class UCommonActivatableWidgetContainerBase;
 
 /**
@@ -23,6 +25,9 @@ class HUDFRAMEWORK_API UHUDPrimaryLayout: public UCommonUserWidget
 	GENERATED_BODY()
 public:
 
+	// @todo: PushUniqueWidgetToLayer - does nothing if widget of class is already present in the container, instead brings it up to the front
+	// @todo: PushUniqueWidgetToLayerAsync - does nothing if widget of class is already present in the container, instead brings it up to the front
+	
 	/**
 	 * Adds activatable widget of @WidgetClass to the layer referenced by @LayerTag. Performs async load for given @WidgetClass
 	 */
@@ -34,6 +39,22 @@ public:
 			[this, LayerTag, WidgetClass]()
 		{
 			PushWidgetToLayer<TActivatableWidget>(LayerTag, WidgetClass.Get());
+		}));
+
+		return StreamableHandle;
+	}
+
+	/**
+	 * Adds activatable widget of @WidgetClass to the layer referenced by @LayerTag. Performs async load for given @WidgetClass
+	 */
+	template <typename TActivatableWidget>
+	TSharedPtr<FStreamableHandle> PushWidgetToLayerAsync(FGameplayTag LayerTag, TSoftClassPtr<TActivatableWidget> WidgetClass, const FHUDWidgetContextHandle& WidgetContext)
+	{
+		FStreamableManager& StreamableManager = UAssetManager::Get().GetStreamableManager();
+		TSharedPtr<FStreamableHandle> StreamableHandle = StreamableManager.RequestAsyncLoad(WidgetClass.ToSoftObjectPath(), FStreamableDelegate::CreateWeakLambda(this,
+			[this, LayerTag, WidgetClass, WidgetContext]()
+		{
+			PushWidgetToLayer<TActivatableWidget>(LayerTag, WidgetClass.Get(), WidgetContext);
 		}));
 
 		return StreamableHandle;
@@ -65,8 +86,10 @@ public:
 	template <typename TActivatableWidget>
 	TActivatableWidget* PushWidgetToLayer(FGameplayTag LayerTag, TSubclassOf<TActivatableWidget> WidgetClass)
 	{
+		check(bAddWidgetGuard == false);
 		if (UCommonActivatableWidgetContainerBase* Layer = GetLayerWidget(LayerTag))
 		{
+			TGuardValue Guard{bAddWidgetGuard, true};
 			return Layer->AddWidget<TActivatableWidget>(WidgetClass);
 		}
 
@@ -77,9 +100,30 @@ public:
 	template <typename TActivatableWidget>
 	TActivatableWidget* PushWidgetToLayer(FGameplayTag LayerTag, TSubclassOf<TActivatableWidget> WidgetClass, TFunction<void(TActivatableWidget&)> InitFunc)
 	{
+		check(bAddWidgetGuard == false);
 		if (UCommonActivatableWidgetContainerBase* Layer = GetLayerWidget(LayerTag))
 		{
+			TGuardValue Guard{bAddWidgetGuard, true};
 			return Layer->AddWidget<TActivatableWidget>(WidgetClass, InitFunc);
+		}
+		
+		return nullptr;
+	}
+
+	template <typename TActivatableWidget>
+	TActivatableWidget* PushWidgetToLayer(FGameplayTag LayerTag, TSubclassOf<TActivatableWidget> WidgetClass, const FHUDWidgetContextHandle& WidgetContext)
+	{
+		check(bAddWidgetGuard == false);
+		if (UCommonActivatableWidgetContainerBase* Layer = GetLayerWidget(LayerTag))
+		{
+			TGuardValue Guard{bAddWidgetGuard, true};
+			ActiveContext = WidgetContext;
+			
+			TActivatableWidget* Widget = Layer->AddWidget<TActivatableWidget>(WidgetClass);
+			// activatable widget should 'consume' widget context
+			check(!ActiveContext.IsValid());
+
+			return Widget;
 		}
 		
 		return nullptr;
@@ -101,8 +145,14 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Layer")
 	void UnregisterLayer(UPARAM(meta = (Categories = "HUD.Layer")) FGameplayTag LayerTag);
+
+	void InitActivatableWidget(UCommonActivatableWidget* NewWidget);
 	
 protected:
+
+	/** Context for a widget currently being added to the layer */
+	FHUDWidgetContextHandle ActiveContext;
+	bool bAddWidgetGuard;
 
 	/** Registered layers for primary layout */
 	UPROPERTY(Transient)

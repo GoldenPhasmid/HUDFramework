@@ -1,6 +1,7 @@
 ﻿#include "Indicators/IndicatorManagerComponent.h"
 
 #include "HUDFramework.h"
+#include "Indicators/IndicatorBlueprintLibrary.h"
 #include "Indicators/IndicatorDescriptor.h"
 
 UIndicatorManagerComponent::UIndicatorManagerComponent(const FObjectInitializer& Initializer) : Super(Initializer)
@@ -51,13 +52,13 @@ UIndicatorManagerComponent* UIndicatorManagerComponent::Get(const UObject* World
 void UIndicatorManagerComponent::AddIndicator(const UIndicatorDescriptor* Descriptor, const AActor* OwnerActor)
 {
 	// create context anyway with Descriptor as a data object
-	AddIndicatorWithContext(Descriptor, OwnerActor, FHUDWidgetContextHandle::CreateContext<FHUDWidgetContext>(nullptr, Descriptor));
+	AddIndicatorWithContext(Descriptor, OwnerActor, FHUDWidgetContextHandle::CreateContext<FIndicatorWidgetContext>(nullptr, Descriptor));
 }
 
 void UIndicatorManagerComponent::AddIndicator(const UIndicatorDescriptor* Descriptor, const USceneComponent* Component, FName SocketName)
 {
 	// create context anyway with Descriptor as a data object
-	AddIndicatorWithContext(Descriptor, Component, SocketName, FHUDWidgetContextHandle::CreateContext<FHUDWidgetContext>(nullptr, Descriptor));
+	AddIndicatorWithContext(Descriptor, Component, SocketName, FHUDWidgetContextHandle::CreateContext<FIndicatorWidgetContext>(nullptr, Descriptor));
 }
 
 void UIndicatorManagerComponent::AddIndicatorWithContext(const UIndicatorDescriptor* Descriptor, const AActor* OwnerActor, const FHUDWidgetContextHandle& WidgetContext)

@@ -47,31 +47,31 @@ UHUDPrimaryLayout* UHUDLayoutBlueprintLibrary::GetPrimaryLayout(const APlayerCon
 	return nullptr;
 }
 
-UCommonActivatableWidget* UHUDLayoutBlueprintLibrary::PushContentToLayer(const APlayerController* PlayerController, FGameplayTag LayerTag, TSubclassOf<UCommonActivatableWidget> WidgetClass)
+UCommonActivatableWidget* UHUDLayoutBlueprintLibrary::PushContentToLayer(const APlayerController* PlayerController, FGameplayTag LayerTag, TSubclassOf<UCommonActivatableWidget> WidgetClass, FHUDWidgetContextHandle WidgetContext)
 {
 	if (!IsValid(PlayerController) || !LayerTag.IsValid())
 	{
 		return nullptr;
 	}
 
-	if (UHUDPrimaryLayout* PrimaryLayout =  UHUDLayoutBlueprintLibrary::GetPrimaryLayout(PlayerController))
+	if (UHUDPrimaryLayout* PrimaryLayout = GetPrimaryLayout(PlayerController))
 	{
-		return PrimaryLayout->PushWidgetToLayer(LayerTag, WidgetClass);
+		return PrimaryLayout->PushWidgetToLayer(LayerTag, WidgetClass, WidgetContext);
 	}
 
 	return nullptr;
 }
 
-void UHUDLayoutBlueprintLibrary::PushStreamedContentToLayer(const APlayerController* PlayerController, FGameplayTag LayerTag, TSoftClassPtr<UCommonActivatableWidget> WidgetClass)
+void UHUDLayoutBlueprintLibrary::PushStreamedContentToLayer(const APlayerController* PlayerController, FGameplayTag LayerTag, TSoftClassPtr<UCommonActivatableWidget> WidgetClass, FHUDWidgetContextHandle WidgetContext)
 {
 	if (!IsValid(PlayerController) || !LayerTag.IsValid() || WidgetClass == nullptr)
 	{
 		return;
 	}
 
-	if (UHUDPrimaryLayout* PrimaryLayout =  UHUDLayoutBlueprintLibrary::GetPrimaryLayout(PlayerController))
+	if (UHUDPrimaryLayout* PrimaryLayout = GetPrimaryLayout(PlayerController))
 	{
-		PrimaryLayout->PushWidgetToLayerAsync(LayerTag, WidgetClass);
+		PrimaryLayout->PushWidgetToLayerAsync(LayerTag, WidgetClass, WidgetContext);
 	}
 }
 
@@ -92,7 +92,7 @@ void UHUDLayoutBlueprintLibrary::SetWidgetContext_FromHandle(UUserWidget* UserWi
 {
 	if (UHUDWidgetContextSubsystem* Subsystem = UHUDWidgetContextSubsystem::Get(UserWidget))
 	{
-		Subsystem->RegisterWidget(UserWidget, ContextHandle);
+		Subsystem->InitializeWidget(UserWidget, ContextHandle);
 	}
 }
 

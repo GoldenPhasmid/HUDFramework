@@ -2,7 +2,7 @@
 
 #include "AsyncMixin.h"
 #include "GameplayTagContainer.h"
-#include "HUDUserWidgetPool.h"
+#include "HUDWidgetPool.h"
 #include "IndicatorDescriptor.h"
 #include "IndicatorManagerComponent.h"
 #include "IndicatorProjectionMode.h"
@@ -252,7 +252,7 @@ private:
 	TPanelChildren<FArrowSlot> ArrowChildren;
 	FCombinedChildren AllChildren;
 	
-	FHUDUserWidgetPool IndicatorPool;
+	FHUDWidgetPool IndicatorPool;
 
 	FLocalPlayerContext LocalPlayerContext;
 

@@ -3,11 +3,12 @@
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "HUDWidgetContext.h"
-#include "HUDUserWidgetPool.h"
+#include "HUDWidgetPool.h"
 
 #include "HUDWidgetContextSubsystem.generated.h"
 
-struct FHUDUserWidgetPool;
+struct FUserWidgetPool;
+struct FHUDWidgetPool;
 class FHUDLayoutExtension;
 class UMVVMView;
 class UMVVMViewModelBase;
@@ -19,6 +20,7 @@ class HUDFRAMEWORK_API UHUDWidgetContextSubsystem: public UGameInstanceSubsystem
 	GENERATED_BODY()
 public:
 
+	/** @return widget context subsystem. Valid only for game worlds */
 	static UHUDWidgetContextSubsystem* Get(const UObject* WorldContextObject);
 	static UHUDWidgetContextSubsystem* Get(const UWorld* World);
 
@@ -35,20 +37,31 @@ public:
 	void InitializeWidget(UUserWidget* UserWidget, const FHUDWidgetContextHandle& WidgetContext);
 
 	/**
-	 * Register and initialize widget, widget pool version
+	 * Register and initialize widget, HUD widget pool version
+	 * Explicitly handles widget context extension if it is already present on a widget
 	 * @param WidgetPool reference to owning widget pool
 	 * @param UserWidget user widget to initialize
 	 * @param WidgetContext widget context
 	 */
-	void InitializeWidget_FromWidgetPool(const FHUDUserWidgetPool& WidgetPool, UUserWidget* UserWidget, const FHUDWidgetContextHandle& WidgetContext);
+	void InitializeWidget_FromHUDWidgetPool(const FHUDWidgetPool& WidgetPool, UUserWidget* UserWidget, const FHUDWidgetContextHandle& WidgetContext);
+
+	/**
+	 * Register and initialize widget, UE widget pool version.
+	 * @note Use only with unreal stuff where you can't replace original widget pool with a plugin version
+	 * @param UserWidget user widget to initialize
+	 * @param WidgetContext widget context
+	 */
+	void InitializeWidget_FromUserWidgetPool(UUserWidget* UserWidget, const FHUDWidgetContextHandle& WidgetContext);
 	
 	/**
 	 * register user widget with provided widget context
 	 * @param UserWidget user widget
 	 * @param WidgetContext widget context
+	 * @param bFromWidgetPool
 	 * @return whether widget was successfully registered
 	 */
-	bool RegisterWidget(UUserWidget* UserWidget, const FHUDWidgetContextHandle& WidgetContext);
+	UE_DEPRECATED(5.4, "Will be made private.")
+	bool CreateWidgetExtension(UUserWidget* UserWidget, const FHUDWidgetContextHandle& WidgetContext, bool bFromWidgetPool);
 	
 	/** @return widget context for given user widget. Widget should be registered with subsystem beforehand */
 	FHUDWidgetContextHandle GetWidgetContext(const UUserWidget* UserWidget) const;
@@ -94,6 +107,9 @@ protected:
 	 * Widget should not be initialized if it is already a part of initializing widget tree
 	 */
 	bool IsPartOfActiveWidgetTree(const UUserWidget* UserWidget) const;
+
+	/** */
+	const UUserWidget* GetActiveWidgetTreeForWidget(const UUserWidget* UserWidget) const;
 
 private:
 	

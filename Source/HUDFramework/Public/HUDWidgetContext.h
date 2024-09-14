@@ -22,7 +22,7 @@ struct HUDFRAMEWORK_API FHUDWidgetContextBase
  * @todo: create empty base class FHUDWidgetContextBase
  */
 USTRUCT(BlueprintType)
-struct HUDFRAMEWORK_API FHUDWidgetContext
+struct HUDFRAMEWORK_API FHUDWidgetContext: public FHUDWidgetContextBase
 {
 	GENERATED_BODY()
 
@@ -44,7 +44,7 @@ struct HUDFRAMEWORK_API FHUDWidgetContext
 	TObjectPtr<const UObject> DataObject;
 };
 
-using FHUDWidgetContextProxy = FHUDWidgetContext;
+using FHUDWidgetContextProxy = FHUDWidgetContextBase;
 
 USTRUCT(BlueprintType)
 struct HUDFRAMEWORK_API FHUDWidgetContextHandle
@@ -58,7 +58,7 @@ struct HUDFRAMEWORK_API FHUDWidgetContextHandle
 		, ContextType(Other.ContextType)
 	{}
 
-	template <typename TContextType = FHUDWidgetContext, TEMPLATE_REQUIRES(TIsDerivedFrom<TContextType, FHUDWidgetContextProxy>::IsDerived)>
+	template <typename TContextType = FHUDWidgetContextProxy, TEMPLATE_REQUIRES(TIsDerivedFrom<TContextType, FHUDWidgetContextProxy>::IsDerived)>
 	explicit FHUDWidgetContextHandle(const TSharedRef<TContextType>& Context)
 		: ContextData(Context)
 		, ContextType(TBaseStructure<TContextType>::Get())
@@ -76,6 +76,12 @@ struct HUDFRAMEWORK_API FHUDWidgetContextHandle
 	bool IsValid() const
 	{
 		return ContextData.IsValid() && ContextType.IsValid();
+	}
+
+	void Invalidate()
+	{
+		ContextData.Reset();
+		ContextType = nullptr;
 	}
 
 	/** */
@@ -105,7 +111,7 @@ struct HUDFRAMEWORK_API FHUDWidgetContextHandle
 	{
 		return ContextType.Get();
 	}
-
+	
 	template <typename TContextType>
 	const TContextType& GetContext() const
 	{
@@ -163,7 +169,7 @@ struct TStructOpsTypeTraits<FHUDWidgetContextHandle>: public TStructOpsTypeTrait
 {
 	enum
 	{
-		WithCopy = true, // Necessary so that TSharedPtr<FBeefWorldGenerationContext> Data is copied around
+		WithCopy = true, // Necessary so that TSharedPtr data is copied around
 		WithIdenticalViaEquality = true,
 	};
 };

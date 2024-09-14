@@ -291,7 +291,7 @@ void SIndicatorCanvas::HandleIndicatorAdded(const TSharedRef<FIndicatorDescripto
 			{
 				if (WidgetContextSubsystem.IsValid())
 				{
-					WidgetContextSubsystem->InitializeWidget_FromWidgetPool(IndicatorPool, UserWidget, SharedInstance->WidgetContext);
+					WidgetContextSubsystem->InitializeWidget_FromHUDWidgetPool(IndicatorPool, UserWidget, SharedInstance->WidgetContext);
 				}
 			});
 

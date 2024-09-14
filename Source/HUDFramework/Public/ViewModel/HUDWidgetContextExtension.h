@@ -39,6 +39,16 @@ public:
 		bInitialized = bNewInitialized;
 	}
 
+	FORCEINLINE bool FromWidgetPool() const
+	{
+		return bFromWidgetPool;
+	}
+
+	FORCEINLINE void SetFromWidgetPool(bool bValue)
+	{
+		bFromWidgetPool = bValue;
+	}
+
 protected:
 
 	UPROPERTY()
@@ -46,4 +56,7 @@ protected:
 
 	UPROPERTY()
 	bool bInitialized = false;
+
+	UPROPERTY()
+	bool bFromWidgetPool = false;
 };

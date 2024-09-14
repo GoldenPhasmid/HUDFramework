@@ -1,7 +1,9 @@
 ﻿#include "HUDPrimaryLayout.h"
 
+#include "CommonActivatableWidget.h"
 #include "GameplayTagContainer.h"
 #include "HUDFramework.h"
+#include "ViewModel/HUDWidgetContextSubsystem.h"
 #include "Widgets/CommonActivatableWidgetContainer.h"
 
 void UHUDPrimaryLayout::PopWidget(UCommonActivatableWidget* Widget)
@@ -76,4 +78,19 @@ void UHUDPrimaryLayout::UnregisterLayer(FGameplayTag LayerTag)
 	}
 	
 	ActiveLayers.Remove(LayerTag);
+}
+
+void UHUDPrimaryLayout::InitActivatableWidget(UCommonActivatableWidget* NewWidget)
+{
+	check(bAddWidgetGuard == true);
+
+	if (ActiveContext.IsValid())
+	{
+		if (UHUDWidgetContextSubsystem* Subsystem = UHUDWidgetContextSubsystem::Get(this))
+		{
+			Subsystem->InitializeWidget_FromUserWidgetPool(NewWidget, ActiveContext);
+		}
+		ActiveContext.Invalidate();
+	}
+
 }

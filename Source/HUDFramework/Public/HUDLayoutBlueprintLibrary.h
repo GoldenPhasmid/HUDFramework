@@ -30,11 +30,11 @@ public:
 
 	/** Push widget to the layer for given player */
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "HUD")
-	static UCommonActivatableWidget* PushContentToLayer(const APlayerController* PlayerController, UPARAM(meta = (Categories = "HUD.Layer")) FGameplayTag LayerTag, TSubclassOf<UCommonActivatableWidget> WidgetClass);
+	static UCommonActivatableWidget* PushContentToLayer(const APlayerController* PlayerController, UPARAM(meta = (Categories = "HUD.Layer")) FGameplayTag LayerTag, TSubclassOf<UCommonActivatableWidget> WidgetClass, FHUDWidgetContextHandle WidgetContext);
 
 	/** Push widget async to the layer for given player */
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "HUD")
-	static void PushStreamedContentToLayer(const APlayerController* PlayerController, UPARAM(meta = (Categories = "HUD.Layer")) FGameplayTag LayerTag, TSoftClassPtr<UCommonActivatableWidget> WidgetClass);
+	static void PushStreamedContentToLayer(const APlayerController* PlayerController, UPARAM(meta = (Categories = "HUD.Layer")) FGameplayTag LayerTag, TSoftClassPtr<UCommonActivatableWidget> WidgetClass, FHUDWidgetContextHandle WidgetContext);
 
 	/** Remove widget from the layer for given player */
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "HUD")

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "HUDWidgetContext.h"
+#include "IndicatorDescriptor.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 
 #include "IndicatorBlueprintLibrary.generated.h"
@@ -8,6 +10,24 @@
 class AActor;
 class USceneComponent;
 class UIndicatorDescriptor;
+
+USTRUCT(BlueprintType)
+struct FIndicatorWidgetContext: public FHUDWidgetContextBase
+{
+	GENERATED_BODY()
+
+	FIndicatorWidgetContext() = default;
+	FIndicatorWidgetContext(UObject* InContextObject, const UIndicatorDescriptor* InDescriptor)
+		: ContextObject(InContextObject)
+		, Descriptor(InDescriptor)
+	{}
+	
+	UPROPERTY(BlueprintReadWrite)
+	UObject* ContextObject;
+
+	UPROPERTY(BlueprintReadWrite)
+	const UIndicatorDescriptor* Descriptor;
+};
 
 UCLASS()
 class HUDFRAMEWORK_API UIndicatorBlueprintLibrary: public UBlueprintFunctionLibrary

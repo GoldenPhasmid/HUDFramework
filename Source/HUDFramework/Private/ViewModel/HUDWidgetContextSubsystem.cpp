@@ -20,8 +20,13 @@ DECLARE_CYCLE_STAT(TEXT("TickViewModels"),			STAT_HUD_Framework_TickModels,			ST
 
 UHUDWidgetContextSubsystem* UHUDWidgetContextSubsystem::Get(const UObject* WorldContextObject)
 {
-	const UWorld* World = GEngine->GetWorldFromContextObjectChecked(WorldContextObject);
-	return Get(World);
+	// might be called in widget design time
+	if (const UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
+	{
+		return Get(World);
+	}
+
+	return nullptr;
 }
 
 UHUDWidgetContextSubsystem* UHUDWidgetContextSubsystem::Get(const UWorld* World)
@@ -59,7 +64,7 @@ void UHUDWidgetContextSubsystem::Deinitialize()
 	Super::Deinitialize();
 }
 
-bool UHUDWidgetContextSubsystem::RegisterWidget(UUserWidget* UserWidget, const FHUDWidgetContextHandle& WidgetContext)
+bool UHUDWidgetContextSubsystem::CreateWidgetExtension(UUserWidget* UserWidget, const FHUDWidgetContextHandle& WidgetContext, bool bFromWidgetPool)
 {
 	if (!IsValid(UserWidget))
 	{
@@ -69,27 +74,43 @@ bool UHUDWidgetContextSubsystem::RegisterWidget(UUserWidget* UserWidget, const F
 	// widget returned from widget pool can be either newly created or already constructed
 	if (UHUDWidgetContextExtension* ContextExtension = UserWidget->GetExtension<UHUDWidgetContextExtension>())
 	{
+		// widget pool widgets should stay in widget pool
+		check(ContextExtension->FromWidgetPool() == bFromWidgetPool);
 		ContextExtension->SetWidgetContext(WidgetContext);
 	}
 	else
 	{
 		ContextExtension = UserWidget->AddExtension<UHUDWidgetContextExtension>();
+		ContextExtension->SetFromWidgetPool(bFromWidgetPool);
 		ContextExtension->SetWidgetContext(WidgetContext);
 	}
 
 	return true;
 }
 
-void UHUDWidgetContextSubsystem::InitializeWidget_FromWidgetPool(const FHUDUserWidgetPool& WidgetPool, UUserWidget* UserWidget, const FHUDWidgetContextHandle& WidgetContext)
+void UHUDWidgetContextSubsystem::InitializeWidget_FromHUDWidgetPool(const FHUDWidgetPool& WidgetPool, UUserWidget* UserWidget, const FHUDWidgetContextHandle& WidgetContext)
 {
-	if (!RegisterWidget(UserWidget, WidgetContext))
+	constexpr bool bFromWidgetPool = true;
+PRAGMA_DISABLE_DEPRECATION_WARNINGS
+	if (!CreateWidgetExtension(UserWidget, WidgetContext, bFromWidgetPool))
+PRAGMA_ENABLE_DEPRECATION_WARNINGS
 	{
 		return;
 	}
 
+	if (UserWidget->IsConstructed())
+	{
+		// already constructed widgets are not supported, even in widget pool case
+		const FString WidgetTree = UHUDLayoutBlueprintLibrary::ConstructWidgetTreeString(UserWidget);
+		UE_LOG(LogHUDFramework, Error, TEXT("%s: Trying to initialize widget that is already constructed. ")
+									   TEXT("Either initialization is late or calling code is using widget pool.\nWidget Tree: %s"),
+			*FString(__FUNCTION__), *WidgetTree);
+		return;
+	}
+
 	// widget pool is a special case of widget initialization
-	// widget already Constructed, has WidgetContextExtension and initialized view model
-	// out target is to properly "deinitialize" ViewModel (in InitializeWidgetInternal) and "initialize" it back (again InitializeWidgetInternal)
+	// WidgetContextExtension might already been created and initialized, same for viewmodel sources
+	// out target is to properly "deinitialize" ViewModel and binding sources(in InitializeWidgetInternal) and "initialize" them again (again InitializeWidgetInternal)
 	// Widgets that are used in widget pool shouldn't rely on Construct/Destruct calls anyway
 	if (UHUDWidgetContextExtension* Extension = UserWidget->GetExtension<UHUDWidgetContextExtension>())
 	{
@@ -104,50 +125,84 @@ void UHUDWidgetContextSubsystem::InitializeWidget_FromWidgetPool(const FHUDUserW
 	}
 }
 
+void UHUDWidgetContextSubsystem::InitializeWidget_FromUserWidgetPool(UUserWidget* UserWidget, const FHUDWidgetContextHandle& WidgetContext)
+{
+	static FHUDWidgetPool Dummy{};
+	InitializeWidget_FromHUDWidgetPool(Dummy, UserWidget, WidgetContext);
+}
+
 void UHUDWidgetContextSubsystem::InitializeWidget(UUserWidget* UserWidget, const FHUDWidgetContextHandle& WidgetContext)
 {
 	if (!IsValid(UserWidget))
 	{
 		return;
 	}
-	
+
 	if (UserWidget->IsConstructed())
 	{
-		// already constructed widgets are not supported
+		// already constructed widgets are not supported, even in widget pool case
 		const FString WidgetTree = UHUDLayoutBlueprintLibrary::ConstructWidgetTreeString(UserWidget);
 		UE_LOG(LogHUDFramework, Error, TEXT("%s: Trying to initialize widget that is already constructed. ")
 									   TEXT("Either initialization is late or calling code is using widget pool.\nWidget Tree: %s"),
 			*FString(__FUNCTION__), *WidgetTree);
 		return;
 	}
-	
-	if (UserWidget->GetExtension<UHUDWidgetContextExtension>() != nullptr)
+
+	bool bFromWidgetPool = false;
+	const UUserWidget* RootWidget = GetActiveWidgetTreeForWidget(UserWidget);
+	// We determine whether initializing widget is a part of another widget that uses widget pool
+	// If yes, we should promote widget pool status to the newly created extension and skip checks that are valid for normally created widgets
+	if (RootWidget != nullptr)
 	{
-		// user widget has already been registered. Widgets are either initialized right away or registered as part of parent widget tree initialization
-		const FString WidgetTree = UHUDLayoutBlueprintLibrary::ConstructWidgetTreeString(UserWidget);
-		UE_LOG(LogHUDFramework, Error, TEXT("%s: Trying to directly initialize already registered widget. ")
-									   TEXT("Possible scenario - widget was mistakenly initialized directly by InitializeWidget call, and then initialized as part of widget tree initialization.\n")
-									   TEXT("Widget cannot be registered or initialized twice. \nWidget Tree: %s"), *FString(__FUNCTION__), *WidgetTree);
-		return;
+		const UHUDWidgetContextExtension* RootExtension = RootWidget->GetExtension<UHUDWidgetContextExtension>();
+		// widget should be already initialized
+		check(RootExtension && RootExtension->IsInitialized());
+		bFromWidgetPool = RootExtension->FromWidgetPool();
 	}
 
-	const UMVVMView* View = UserWidget->GetExtension<UMVVMView>();
-	if (View && View->AreSourcesInitialized())
+	if (bFromWidgetPool)
 	{
-		// view models are already initialized at this point
-		const FString WidgetTree = UHUDLayoutBlueprintLibrary::ConstructWidgetTreeString(UserWidget);
-		UE_LOG(LogHUDFramework, Error, TEXT("%s: Trying to initialize widget with already initialized sources. ")
-									   TEXT("Either initialization is late or calling code is using widget pool.\nWidget Tree: %s"),
-			*FString(__FUNCTION__), *WidgetTree);
-		return;
+		if (UHUDWidgetContextExtension* Extension = UserWidget->GetExtension<UHUDWidgetContextExtension>())
+		{
+			// force Deinitialize extension
+			// view binding sources are checked and deinitialized later in InitializeWidgetInternal
+			Extension->SetInitialized(false);
+		}
 	}
+	else
+	{
+		// widget is either a root widget or created as a part of widget tree initialization
+		if (UserWidget->GetExtension<UHUDWidgetContextExtension>() != nullptr)
+		{
+			// user widget has already been registered. Widgets are either initialized right away or registered as part of parent widget tree initialization
+			const FString WidgetTree = UHUDLayoutBlueprintLibrary::ConstructWidgetTreeString(UserWidget);
+			UE_LOG(LogHUDFramework, Error, TEXT("%s: Trying to directly initialize already registered widget. ")
+										   TEXT("Possible scenario - widget was mistakenly initialized directly by InitializeWidget call, and then initialized as part of widget tree initialization.\n")
+										   TEXT("Widget cannot be registered or initialized twice. \nWidget Tree: %s"), *FString(__FUNCTION__), *WidgetTree);
+			return;
+		}
+
+		const UMVVMView* View = UserWidget->GetExtension<UMVVMView>();
+		if (View && View->AreSourcesInitialized())
+		{
+			// view models are already initialized at this point
+			const FString WidgetTree = UHUDLayoutBlueprintLibrary::ConstructWidgetTreeString(UserWidget);
+			UE_LOG(LogHUDFramework, Error, TEXT("%s: Trying to initialize widget with already initialized sources. ")
+										   TEXT("Either initialization is late or calling code is using widget pool.\nWidget Tree: %s"),
+				*FString(__FUNCTION__), *WidgetTree);
+			return;
+		}
+	}
+
 
 	// store widget context as part of widget context extension
-	const bool bResult = RegisterWidget(UserWidget, WidgetContext);
+	PRAGMA_DISABLE_DEPRECATION_WARNINGS
+	const bool bResult = CreateWidgetExtension(UserWidget, WidgetContext, bFromWidgetPool);
+	PRAGMA_ENABLE_DEPRECATION_WARNINGS
 	check(bResult);
 
 	// initialize widget tree of original widget, unless it is already a part of currently initializing widget tree
-	if (!IsPartOfActiveWidgetTree(UserWidget))
+	if (RootWidget == nullptr)
 	{
 		InitializeWidgetTree(UserWidget);
 	}
@@ -155,7 +210,11 @@ void UHUDWidgetContextSubsystem::InitializeWidget(UUserWidget* UserWidget, const
 
 bool UHUDWidgetContextSubsystem::IsPartOfActiveWidgetTree(const UUserWidget* UserWidget) const
 {
-	// this is a costly check that goes through widget outer chain and verifies that any of the parent widget doesn't match one of activating widget trees
+	return GetActiveWidgetTreeForWidget(UserWidget) != nullptr;
+}
+
+const UUserWidget* UHUDWidgetContextSubsystem::GetActiveWidgetTreeForWidget(const UUserWidget* UserWidget) const
+{
 	auto Pred = [this](const UWidget* Widget)
 	{
 		if (const UUserWidget* UserWidget = Cast<UUserWidget>(Widget); UserWidget && ActiveWidgetTrees.Contains(UserWidget))
@@ -166,8 +225,9 @@ bool UHUDWidgetContextSubsystem::IsPartOfActiveWidgetTree(const UUserWidget* Use
 		return false;
 	};
 
+	// this is a costly check that goes through widget outer chain and verifies that any of the parent widget doesn't match one of activating widget trees
 	const UWidget* FoundWidget = ForEachParentWidget(UserWidget, Pred);
-	return FoundWidget != nullptr;
+	return CastChecked<UUserWidget>(FoundWidget, ECastCheckedType::NullAllowed);
 }
 
 void UHUDWidgetContextSubsystem::InitializeWidgetTree(UUserWidget* UserWidget)
@@ -179,8 +239,8 @@ void UHUDWidgetContextSubsystem::InitializeWidgetTree(UUserWidget* UserWidget)
 	WidgetsToInitialize.Add(UserWidget);
 	
 	check(ActiveWidgetTrees.Contains(UserWidget) == false);
-	// set widget tree root using guard value.
-	// Prevent another widget to initialize while being a part of other initializing widget tree
+	// add root widget to the list of active widget trees
+	// Prevent another widget to initialize when if it is already going to be initialized as a part of an active widget tree
 	ActiveWidgetTrees.Add(UserWidget);
 	ON_SCOPE_EXIT
 	{
@@ -247,6 +307,8 @@ void UHUDWidgetContextSubsystem::InitializeWidgetInternal(UUserWidget* UserWidge
 	if (UHUDWidgetContextExtension* Extension = UserWidget->GetExtension<UHUDWidgetContextExtension>())
 	{
 		check(!Extension->IsInitialized());
+		Extension->SetInitialized(true);
+		
 		if (UserWidget->Implements<UHUDWidgetContextInterface>())
 		{
 			check(IsWidgetRegistered(UserWidget));
@@ -254,8 +316,6 @@ void UHUDWidgetContextSubsystem::InitializeWidgetInternal(UUserWidget* UserWidge
 			const FHUDWidgetContextHandle WidgetContext = Extension->GetWidgetContext();
 			IHUDWidgetContextInterface::Execute_InitializeWidgetTree(UserWidget, WidgetContext);
 		}
-
-		Extension->SetInitialized(true);
 	}
 }
 

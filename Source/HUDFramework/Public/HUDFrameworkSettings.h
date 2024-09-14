@@ -15,7 +15,7 @@ public:
 
 	UHUDFrameworkSettings(const FObjectInitializer& Initializer);
 
-	UPROPERTY(EditDefaultsOnly, Config)
+	UPROPERTY(EditDefaultsOnly, Config, meta = (Validate))
 	TSoftClassPtr<UHUDLayoutPolicy> PolicyClass;
 	
 };

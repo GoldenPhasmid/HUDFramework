@@ -22,23 +22,29 @@ class HUDFRAMEWORK_API UHUDLayoutBlueprintLibrary: public UBlueprintFunctionLibr
 	GENERATED_BODY()
 public:
 
+	/** @return widget tree description starting from the given widget up to the tree root. Description contains user widgets only */
 	UFUNCTION(BlueprintPure, BlueprintCosmetic, Category = "HUD")
 	static FString ConstructWidgetTreeString(const UUserWidget* UserWidget);
 
+	/** @return primary layout for a given player */
 	UFUNCTION(BlueprintPure, BlueprintCosmetic, Category = "HUD")
 	static UHUDPrimaryLayout* GetPrimaryLayout(const APlayerController* PlayerController);
 
-	/** Push widget to the layer for given player */
+	/** Push widget to the layer for a given player */
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "HUD")
 	static UCommonActivatableWidget* PushContentToLayer(const APlayerController* PlayerController, UPARAM(meta = (Categories = "HUD.Layer")) FGameplayTag LayerTag, TSubclassOf<UCommonActivatableWidget> WidgetClass, FHUDWidgetContextHandle WidgetContext);
 
-	/** Push widget async to the layer for given player */
+	/** Push widget async to the layer for a given player */
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "HUD")
 	static void PushStreamedContentToLayer(const APlayerController* PlayerController, UPARAM(meta = (Categories = "HUD.Layer")) FGameplayTag LayerTag, TSoftClassPtr<UCommonActivatableWidget> WidgetClass, FHUDWidgetContextHandle WidgetContext);
 
-	/** Remove widget from the layer for given player */
+	/** Remove widget from the layer for a given player */
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "HUD")
 	static void PopContentFromLayer(const APlayerController* PlayerController, UPARAM(meta = (Categories = "HUD.Layer")) FGameplayTag LayerTag, UCommonActivatableWidget* Widget);
+
+	/** Remove widget from the primary layout */
+	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "HUD", meta = (DefaultToSelf = "Widget"))
+	static void PopWidgetFromLayer(UCommonActivatableWidget* Widget);
 	
 	UE_DEPRECATED(5.4, "")
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "HUD", DisplayName = "Set Widget Context (Handle)", meta = (DeprecatedFunction, DeprecationMessage = "Use InitializeWidgetFromHandle instead."))

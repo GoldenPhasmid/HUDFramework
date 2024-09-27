@@ -88,6 +88,17 @@ void UHUDLayoutBlueprintLibrary::PopContentFromLayer(const APlayerController* Pl
 	}
 }
 
+void UHUDLayoutBlueprintLibrary::PopWidgetFromLayer(UCommonActivatableWidget* Widget)
+{
+	if (Widget != nullptr)
+	{
+		if (UHUDPrimaryLayout* PrimaryLayout = UHUDLayoutBlueprintLibrary::GetPrimaryLayout(Widget->GetOwningPlayer()))
+		{
+			PrimaryLayout->PopWidget(Widget);
+		}
+	}
+}
+
 void UHUDLayoutBlueprintLibrary::SetWidgetContext_FromHandle(UUserWidget* UserWidget, const FHUDWidgetContextHandle& ContextHandle)
 {
 	if (UHUDWidgetContextSubsystem* Subsystem = UHUDWidgetContextSubsystem::Get(UserWidget))

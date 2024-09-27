@@ -146,7 +146,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Layer")
 	void UnregisterLayer(UPARAM(meta = (Categories = "HUD.Layer")) FGameplayTag LayerTag);
 
-	void InitActivatableWidget(UCommonActivatableWidget* NewWidget);
+	void InitActivatableWidget(UCommonActivatableWidget& NewWidget);
 	
 protected:
 

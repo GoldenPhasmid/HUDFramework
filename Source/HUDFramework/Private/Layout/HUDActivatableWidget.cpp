@@ -12,7 +12,7 @@ TSharedRef<SWidget> UHUDActivatableWidget::RebuildWidget()
 
 		if (UHUDPrimaryLayout* PrimaryLayout = UHUDLayoutBlueprintLibrary::GetPrimaryLayout(OwningPlayer))
 		{
-			PrimaryLayout->InitActivatableWidget(this);
+			PrimaryLayout->InitActivatableWidget(*this);
 		}
 	}
 	

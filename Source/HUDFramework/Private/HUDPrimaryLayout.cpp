@@ -80,7 +80,7 @@ void UHUDPrimaryLayout::UnregisterLayer(FGameplayTag LayerTag)
 	ActiveLayers.Remove(LayerTag);
 }
 
-void UHUDPrimaryLayout::InitActivatableWidget(UCommonActivatableWidget* NewWidget)
+void UHUDPrimaryLayout::InitActivatableWidget(UCommonActivatableWidget& NewWidget)
 {
 	check(bAddWidgetGuard == true);
 
@@ -88,7 +88,7 @@ void UHUDPrimaryLayout::InitActivatableWidget(UCommonActivatableWidget* NewWidge
 	{
 		if (UHUDWidgetContextSubsystem* Subsystem = UHUDWidgetContextSubsystem::Get(this))
 		{
-			Subsystem->InitializeWidget_FromUserWidgetPool(NewWidget, ActiveContext);
+			Subsystem->InitializeWidget_FromUserWidgetPool(&NewWidget, ActiveContext);
 		}
 		ActiveContext.Invalidate();
 	}

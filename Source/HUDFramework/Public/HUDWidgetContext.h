@@ -4,6 +4,11 @@
 
 #include "HUDWidgetContext.generated.h"
 
+struct FHUDWidgetContextBase;
+struct FHUDWidgetContext;
+struct FHUDWidgetContextHandle;
+using FHUDWidgetContextProxy = FHUDWidgetContextBase;
+
 /**
  * Base class for any widget context data
  * Passed from gameplay layer to UI layer during widget initialization
@@ -19,7 +24,6 @@ struct HUDFRAMEWORK_API FHUDWidgetContextBase
 /**
  * Widget context data, passed from gameplay layer to UI layer during widget initialization
  * subclass to add your own widget context data
- * @todo: create empty base class FHUDWidgetContextBase
  */
 USTRUCT(BlueprintType)
 struct HUDFRAMEWORK_API FHUDWidgetContext: public FHUDWidgetContextBase
@@ -43,8 +47,6 @@ struct HUDFRAMEWORK_API FHUDWidgetContext: public FHUDWidgetContextBase
 	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<const UObject> DataObject;
 };
-
-using FHUDWidgetContextProxy = FHUDWidgetContextBase;
 
 USTRUCT(BlueprintType)
 struct HUDFRAMEWORK_API FHUDWidgetContextHandle
@@ -172,4 +174,29 @@ struct TStructOpsTypeTraits<FHUDWidgetContextHandle>: public TStructOpsTypeTrait
 		WithCopy = true, // Necessary so that TSharedPtr data is copied around
 		WithIdenticalViaEquality = true,
 	};
+};
+
+/**
+ * Widget Context Container
+ * Can hold one or more widget contexts of the same type
+ */
+USTRUCT(BlueprintType)
+struct HUDFRAMEWORK_API FHUDWidgetContextContainer
+{
+	GENERATED_BODY()
+
+	template<typename TContextType, typename TPred, TEMPLATE_REQUIRES(TIsDerivedFrom<TContextType, FHUDWidgetContextProxy>::Value)>
+	void ForEachContext(TPred&& Callable) const
+	{
+		for (const FHUDWidgetContextHandle& Handle : ContextHandles)
+		{
+			if (Handle.IsA<TContextType>())
+			{
+				Invoke(Callable, Handle.GetContext<TContextType>());
+			}
+		}
+	}
+
+	UPROPERTY()
+	TArray<FHUDWidgetContextHandle> ContextHandles;
 };

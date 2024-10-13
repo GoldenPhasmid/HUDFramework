@@ -8,7 +8,7 @@
 
 UHUDLayoutSubsystem* UHUDLayoutSubsystem::Get(const UObject* WorldContextObject)
 {
-	if (const UWorld* World = GEngine->GetWorldFromContextObjectChecked(WorldContextObject))
+	if (const UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
 	{
 		if (UGameInstance* GameInstance = World->GetGameInstance())
 		{

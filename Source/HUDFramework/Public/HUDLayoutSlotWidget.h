@@ -26,10 +26,10 @@ public:
 	virtual TSharedRef<SWidget> RebuildWidget() override;
 	//~End UWidget interface
 	
-	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, meta = (Validate))
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Entry Layout", meta = (Validate))
 	FGameplayTag SlotTag;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (IsBindableEvent = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Entry Layout", meta = (IsBindableEvent = "true"))
 	FConfigureWidget ConfigureWidget;
 	
 protected:

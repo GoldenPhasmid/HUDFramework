@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "HUDLayoutExtension.h"
 #include "HUDWidgetContext.h"
 #include "Components/Widget.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
@@ -32,15 +33,15 @@ public:
 
 	/** Push widget to the layer for a given player */
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "HUD")
-	static UCommonActivatableWidget* PushContentToLayer(const APlayerController* PlayerController, UPARAM(meta = (Categories = "HUD.Layer")) FGameplayTag LayerTag, TSubclassOf<UCommonActivatableWidget> WidgetClass, FHUDWidgetContextHandle WidgetContext);
+	static UCommonActivatableWidget* PushContentToLayer(const APlayerController* PlayerController, UPARAM(meta = (GameplayTagFilter = "HUD.Layer")) FGameplayTag LayerTag, TSubclassOf<UCommonActivatableWidget> WidgetClass, FHUDWidgetContextHandle WidgetContext);
 
 	/** Push widget async to the layer for a given player */
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "HUD")
-	static void PushStreamedContentToLayer(const APlayerController* PlayerController, UPARAM(meta = (Categories = "HUD.Layer")) FGameplayTag LayerTag, TSoftClassPtr<UCommonActivatableWidget> WidgetClass, FHUDWidgetContextHandle WidgetContext);
+	static void PushStreamedContentToLayer(const APlayerController* PlayerController, UPARAM(meta = (GameplayTagFilter = "HUD.Layer")) FGameplayTag LayerTag, TSoftClassPtr<UCommonActivatableWidget> WidgetClass, FHUDWidgetContextHandle WidgetContext);
 
 	/** Remove widget from the layer for a given player */
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "HUD")
-	static void PopContentFromLayer(const APlayerController* PlayerController, UPARAM(meta = (Categories = "HUD.Layer")) FGameplayTag LayerTag, UCommonActivatableWidget* Widget);
+	static void PopContentFromLayer(const APlayerController* PlayerController, UPARAM(meta = (GameplayTagFilter = "HUD.Layer")) FGameplayTag LayerTag, UCommonActivatableWidget* Widget);
 
 	/** Remove widget from the primary layout */
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "HUD", meta = (DefaultToSelf = "Widget"))
@@ -48,11 +49,28 @@ public:
 	
 	UE_DEPRECATED(5.4, "")
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "HUD", DisplayName = "Set Widget Context (Handle)", meta = (DeprecatedFunction, DeprecationMessage = "Use InitializeWidgetFromHandle instead."))
-	static void SetWidgetContext_FromHandle(UUserWidget* UserWidget, const FHUDWidgetContextHandle& ContextHandle);
-	
-	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "HUD", DisplayName = "Initialize Widget From Context Handle")
-	static void InitializeWidgetFromHandle(UUserWidget* UserWidget, const FHUDWidgetContextHandle& ContextHandle);
+	static void SetWidgetContext_FromHandle(UPARAM(Required) UUserWidget* UserWidget, const FHUDWidgetContextHandle& ContextHandle);
 
+	/**
+	 * initialize widget with a given widget context
+	 * will fail if widget has already been constructed
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "HUD", DisplayName = "Initialize Widget From Context Handle")
+	static void InitializeWidgetFromHandle(UPARAM(Required) UUserWidget* UserWidget, const FHUDWidgetContextHandle& ContextHandle);
+
+	/** */
+	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "HUD")
+	static FHUDLayoutExtensionHandle RegisterLayoutExtension(UPARAM(Required) const APlayerController* Player, UPARAM(meta = (GameplayTagFilter = "HUD.Slot")) FGameplayTag SlotTag, TSubclassOf<UUserWidget> WidgetClass);
+
+	/** */
+	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "HUD")
+	static FHUDLayoutExtensionHandle RegisterLayoutExtensionWithContext(UPARAM(Required) const APlayerController* Player, UPARAM(meta = (GameplayTagFilter = "HUD.Slot")) FGameplayTag SlotTag, TSubclassOf<UUserWidget> WidgetClass, const FHUDWidgetContextHandle& WidgetContext);
+
+	/** */
+	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "HUD")
+	static void UnregisterLayoutExtension(UPARAM(ref) FHUDLayoutExtensionHandle& Handle);
+
+	/** @return widget context from an initialized user widget */
 	UFUNCTION(BlueprintPure, BlueprintCosmetic, Category = "HUD")
 	static FHUDWidgetContextHandle GetWidgetContextHandle(const UUserWidget* UserWidget);
 
@@ -102,7 +120,7 @@ protected:
 	static bool IsValid_ExtensionHandle(UPARAM(ref) FHUDLayoutExtensionHandle& Handle);
 
 	/** @return unregisters given layout extension from layout subsystem */
-	UFUNCTION(BlueprintCallable, DisplayName = "Unregister (Extension Handle)")
+	UFUNCTION(BlueprintCallable, DisplayName = "Unregister (Extension Handle)", meta = (DeprecatedFunction, DeprecationMessage = "Use UnregisterLayoutExtension instead."))
 	static void Unregister_ExtensionHandle(UPARAM(ref) FHUDLayoutExtensionHandle& Handle);
 	
 };

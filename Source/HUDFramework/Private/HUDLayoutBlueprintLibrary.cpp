@@ -115,6 +115,36 @@ void UHUDLayoutBlueprintLibrary::InitializeWidgetFromHandle(UUserWidget* UserWid
 	}
 }
 
+FHUDLayoutExtensionHandle UHUDLayoutBlueprintLibrary::RegisterLayoutExtension(const APlayerController* Player, const FGameplayTag SlotTag, TSubclassOf<UUserWidget> WidgetClass)
+{
+	if (UHUDLayoutSubsystem* LayoutSubsystem = UHUDLayoutSubsystem::Get(Player))
+	{
+		return LayoutSubsystem->RegisterLayoutExtension(SlotTag, WidgetClass, Player->GetLocalPlayer());
+	}
+
+	return {};
+}
+
+FHUDLayoutExtensionHandle UHUDLayoutBlueprintLibrary::RegisterLayoutExtensionWithContext(
+	const APlayerController* Player, const FGameplayTag SlotTag, TSubclassOf<UUserWidget> WidgetClass,
+	const FHUDWidgetContextHandle& WidgetContext)
+{
+	if (UHUDLayoutSubsystem* LayoutSubsystem = UHUDLayoutSubsystem::Get(Player))
+	{
+		return LayoutSubsystem->RegisterLayoutExtensionWithContext(SlotTag, WidgetClass, Player->GetLocalPlayer(), WidgetContext);
+	}
+
+	return {};
+}
+
+void UHUDLayoutBlueprintLibrary::UnregisterLayoutExtension(FHUDLayoutExtensionHandle& Handle)
+{
+	if (UHUDLayoutSubsystem* LayoutSubsystem = Handle.GetSubsystem())
+	{
+		LayoutSubsystem->UnregisterLayoutExtension(Handle);
+	}
+}
+
 FHUDWidgetContextHandle UHUDLayoutBlueprintLibrary::GetWidgetContextHandle(const UUserWidget* UserWidget)
 {
 	if (UHUDWidgetContextSubsystem* Subsystem = UHUDWidgetContextSubsystem::Get(UserWidget))

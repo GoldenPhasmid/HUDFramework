@@ -70,18 +70,19 @@ public:
 	FSlotExtensionDelegate OnExtensionRemoved;
 
 protected:
-	
-	UFUNCTION(BlueprintCallable, BlueprintCosmetic, DisplayName = "Register Layout Extension (Widget)")
+
+	// Deprecated Functions Begin
+	UFUNCTION(BlueprintCallable, BlueprintCosmetic, DisplayName = "Register Layout Extension (Widget)", meta = (DeprecatedFunction, DeprecationMessage = "Use UHUDLayoutBlueprintLibrary::RegisterLayoutExtension"))
 	FHUDLayoutExtensionHandle K2_RegisterLayoutExtension(const APlayerController* Player, const FGameplayTag& SlotTag, TSubclassOf<UUserWidget> WidgetClass);
 
-	UFUNCTION(BlueprintCallable, BlueprintCosmetic, DisplayName = "Register Layout Extension (Widget With Context)")
+	UFUNCTION(BlueprintCallable, BlueprintCosmetic, DisplayName = "Register Layout Extension (Widget With Context)", meta = (DeprecatedFunction, DeprecationMessage = "Use UHUDLayoutBlueprintLibrary::RegisterLayoutExtensionWithContext"))
 	FHUDLayoutExtensionHandle K2_RegisterLayoutExtensionWithContext(const APlayerController* Player, const FGameplayTag& SlotTag, TSubclassOf<UUserWidget> WidgetClass, const FHUDWidgetContextHandle& Context);
 
-	UFUNCTION(BlueprintCallable, BlueprintCosmetic, DisplayName = "Unregister Layout Extension")
+	UFUNCTION(BlueprintCallable, BlueprintCosmetic, DisplayName = "Unregister Layout Extension", meta = (DeprecatedFunction, DeprecationMessage = "Use UHUDLayoutBlueprintLibrary::UnregisterLayoutExtension"))
 	void K2_UnregisterLayoutExtension(UPARAM(ref) FHUDLayoutExtensionHandle& Handle);
+	// Deprecated Functions End
 	
 	// @todo: RegisterLayoutSlot with blueprint delegates?
-	// @todo: node to create custom widget context?
 	
 	virtual void OnLocalPlayerAdded(ULocalPlayer* LocalPlayer);
 	virtual void OnLocalPlayerRemoved(ULocalPlayer* LocalPlayer);
@@ -103,8 +104,10 @@ protected:
 	TObjectPtr<UHUDLayoutPolicy> Policy = nullptr;
 	
 	using FLayoutSlotArray = TArray<TSharedPtr<FHUDLayoutSlot>>;
+	/** active slots */
 	TMap<FGameplayTag, FLayoutSlotArray> ActiveSlots;
 	
 	using FLayoutExtensionArray = TArray<TSharedPtr<FHUDLayoutExtension>>;
+	/** active extensions */
 	TMap<FGameplayTag, FLayoutExtensionArray> ActiveExtensions;
 };

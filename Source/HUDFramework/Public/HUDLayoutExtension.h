@@ -29,10 +29,8 @@ struct HUDFRAMEWORK_API FHUDLayoutExtensionHandle
 	
 	FHUDLayoutExtensionHandle() = default;
 	
-	FORCEINLINE bool IsValid() const
-	{
-		return Extension.IsValid();
-	}
+	FORCEINLINE bool IsValid() const { return Extension.IsValid(); }
+	FORCEINLINE  UHUDLayoutSubsystem* GetSubsystem() const { return Subsystem.Get(); }
 	
 	friend FORCEINLINE bool operator==(const FHUDLayoutExtensionHandle& Lhs, const FHUDLayoutExtensionHandle& Rhs)
 	{

@@ -3,6 +3,12 @@
 #include "HUDLayoutBlueprintLibrary.h"
 #include "HUDPrimaryLayout.h"
 
+TOptional<FUIInputConfig> UHUDActivatableWidget::GetDesiredInputConfig() const
+{
+	// default behavior is to receive all input
+	return FUIInputConfig{InputMode, EMouseCaptureMode::CaptureDuringRightMouseDown, false};
+}
+
 TSharedRef<SWidget> UHUDActivatableWidget::RebuildWidget()
 {
 	if (!IsDesignTime())

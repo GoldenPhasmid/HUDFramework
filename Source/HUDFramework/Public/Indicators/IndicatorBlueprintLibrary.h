@@ -23,10 +23,10 @@ struct FIndicatorWidgetContext: public FHUDWidgetContextBase
 	{}
 	
 	UPROPERTY(BlueprintReadWrite)
-	UObject* ContextObject;
+	UObject* ContextObject = nullptr;
 
 	UPROPERTY(BlueprintReadWrite)
-	const UIndicatorDescriptor* Descriptor;
+	const UIndicatorDescriptor* Descriptor = nullptr;
 };
 
 UCLASS()

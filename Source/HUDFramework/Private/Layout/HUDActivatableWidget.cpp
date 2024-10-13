@@ -6,7 +6,7 @@
 TOptional<FUIInputConfig> UHUDActivatableWidget::GetDesiredInputConfig() const
 {
 	// default behavior is to receive all input
-	return FUIInputConfig{InputMode, EMouseCaptureMode::CaptureDuringRightMouseDown, false};
+	return FUIInputConfig{InputMode, EMouseCaptureMode::CaptureDuringMouseDown, false};
 }
 
 TSharedRef<SWidget> UHUDActivatableWidget::RebuildWidget()

@@ -12,6 +12,7 @@ public class HUDFramework : ModuleRules
 			{
 				"Core",
 				"CommonUI",
+				"CommonInput",
 				"UMG",
 				"Slate",
 				"SlateCore",

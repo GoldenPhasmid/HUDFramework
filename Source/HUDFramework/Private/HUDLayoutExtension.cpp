@@ -1,5 +1,7 @@
 ﻿#include "HUDLayoutExtension.h"
 
+#include "HUDLayoutSubsystem.h"
+
 FHUDLayoutExtensionHandle FHUDLayoutExtensionHandle::EmptyHandle;
 
 FHUDLayoutExtension::FHUDLayoutExtension(const FGameplayTag& InSlotTag, TSubclassOf<UUserWidget> InWidgetClass, const ULocalPlayer* InLocalPlayer, const FHUDWidgetContextHandle& InContext)

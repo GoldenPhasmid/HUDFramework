@@ -47,26 +47,28 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "HUD", meta = (DefaultToSelf = "Widget"))
 	static void PopWidgetFromLayer(UCommonActivatableWidget* Widget);
 	
-	UE_DEPRECATED(5.4, "")
-	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "HUD", DisplayName = "Set Widget Context (Handle)", meta = (DeprecatedFunction, DeprecationMessage = "Use InitializeWidgetFromHandle instead."))
-	static void SetWidgetContext_FromHandle(UPARAM(Required) UUserWidget* UserWidget, const FHUDWidgetContextHandle& ContextHandle);
-
 	/**
 	 * initialize widget with a given widget context
 	 * will fail if widget has already been constructed
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "HUD", DisplayName = "Initialize Widget From Context Handle")
-	static void InitializeWidgetFromHandle(UPARAM(Required) UUserWidget* UserWidget, const FHUDWidgetContextHandle& ContextHandle);
+	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "HUD")
+	static void InitializeWidgetFromContextHandle(UPARAM(Required) UUserWidget* UserWidget, const FHUDWidgetContextHandle& ContextHandle);
 
-	/** */
+	/** 
+	 * Register layout extension widget using @SlotTag to identify layout slots.
+	 * Registered extension is automatically added to the newly added slots
+	 */
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "HUD")
 	static FHUDLayoutExtensionHandle RegisterLayoutExtension(UPARAM(Required) const APlayerController* Player, UPARAM(meta = (GameplayTagFilter = "HUD.Slot")) FGameplayTag SlotTag, TSubclassOf<UUserWidget> WidgetClass);
 
-	/** */
+	/** 
+	 * Register layout extension widget using @SlotTag to identify layout slots. @WidgetContext is passed to the widget during initialization
+	 * Registered extension is automatically added to the newly added slots
+	 */
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "HUD")
 	static FHUDLayoutExtensionHandle RegisterLayoutExtensionWithContext(UPARAM(Required) const APlayerController* Player, UPARAM(meta = (GameplayTagFilter = "HUD.Slot")) FGameplayTag SlotTag, TSubclassOf<UUserWidget> WidgetClass, const FHUDWidgetContextHandle& WidgetContext);
 
-	/** */
+	/** Unregister layout extension identified via a valid handle. Does nothing if handle is no longer valid */
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "HUD")
 	static void UnregisterLayoutExtension(UPARAM(ref) FHUDLayoutExtensionHandle& Handle);
 
@@ -102,10 +104,6 @@ protected:
 
 	UFUNCTION(BlueprintPure, DisplayName = "Is Derived From (Widget Context)")
 	static bool IsDerivedFrom_WidgetContext(const FHUDWidgetContextHandle& WidgetContext, UScriptStruct* ContextType);
-
-	UE_DEPRECATED(5.4, "")
-	UFUNCTION(BlueprintPure, DisplayName = "Get Context Object (Widget Context)", meta = (DeprecatedFunction, DeprecationMessage = "Use HUDWidgetContext explicitly."))
-	static UObject* GetContextObject_WidgetContext(const FHUDWidgetContextHandle& WidgetContext);
 	
 	/** @return whether given layout slot handle is valid */
 	UFUNCTION(BlueprintPure, DisplayName = "Is Valid (Slot Handle)")
@@ -122,6 +120,35 @@ protected:
 	/** @return unregisters given layout extension from layout subsystem */
 	UFUNCTION(BlueprintCallable, DisplayName = "Unregister (Extension Handle)", meta = (DeprecatedFunction, DeprecationMessage = "Use UnregisterLayoutExtension instead."))
 	static void Unregister_ExtensionHandle(UPARAM(ref) FHUDLayoutExtensionHandle& Handle);
+
+	UE_DEPRECATED(5.4, "")
+	UFUNCTION(BlueprintPure, DisplayName = "Get Context Object (Widget Context)", meta = (DeprecatedFunction, DeprecationMessage = "Use HUDWidgetContext explicitly."))
+	static UObject* GetContextObject_WidgetContext(const FHUDWidgetContextHandle& WidgetContext);
+	
+	UE_DEPRECATED(5.4, "")
+	UFUNCTION(BlueprintPure, DisplayName = "Get Data Object (Widget Context)", meta = (DeprecatedFunction, DeprecationMessage = "Use HUDWidgetContext explicitly."))
+	static const UObject* GetDataObject_WidgetContext(const FHUDWidgetContextHandle& WidgetContext);
+
+	UE_DEPRECATED(5.4, "")
+	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "HUD", meta = (DeprecatedFunction, DeprecationMessage = "Use InitializeWidgetFromContext instead."))
+	static void InitializeWidget(UPARAM(Required) UUserWidget* UserWidget, UObject* Context, const UObject* DataPayload);
+	
+	UE_DEPRECATED(5.4, "")
+	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "HUD", meta = (DeprecatedFunction, DeprecationMessage = "Use InitializeWidgetFromContext instead."))
+	static void SetWidgetContext(UPARAM(Required) UUserWidget* UserWidget, UObject* Context, const UObject* DataPayload);
+	
+	UE_DEPRECATED(5.4, "")
+	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "HUD", DisplayName = "Set Widget Context (Handle)", meta = (DeprecatedFunction, DeprecationMessage = "Use InitializeWidgetFromHandle instead."))
+	static void SetWidgetContext_FromHandle(UPARAM(Required) UUserWidget* UserWidget, const FHUDWidgetContextHandle& ContextHandle);
+
+	UE_DEPRECATED(5.4, "")
+	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "HUD", meta = (DeprecatedFunction, DeprecationMessage = "Use InitializeWidgetFromContextHandle instead."))
+	static void InitializeWidget_FromHandle(UPARAM(Required) UUserWidget* UserWidget, const FHUDWidgetContextHandle& ContextHandle);
+
+	UE_DEPRECATED(5.4, "")
+	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "HUD", meta = (DeprecatedFunction, DeprecationMessage = "Use InitializeWidgetFromContextHandle instead."))
+	static void InitializeWidgetFromHandle(UPARAM(Required) UUserWidget* UserWidget, const FHUDWidgetContextHandle& ContextHandle);
+
 	
 };
 

@@ -99,6 +99,16 @@ void UHUDLayoutBlueprintLibrary::PopWidgetFromLayer(UCommonActivatableWidget* Wi
 	}
 }
 
+void UHUDLayoutBlueprintLibrary::InitializeWidget(UUserWidget* UserWidget, UObject* Context, const UObject* DataPayload)
+{
+	InitializeWidgetFromContextHandle(UserWidget, FHUDWidgetContextHandle::CreateContext<FHUDWidgetContext>(Context, DataPayload));
+}
+
+void UHUDLayoutBlueprintLibrary::SetWidgetContext(UUserWidget* UserWidget, UObject* Context, const UObject* DataPayload)
+{
+	InitializeWidgetFromContextHandle(UserWidget, FHUDWidgetContextHandle::CreateContext<FHUDWidgetContext>(Context, DataPayload));
+}
+
 void UHUDLayoutBlueprintLibrary::SetWidgetContext_FromHandle(UUserWidget* UserWidget, const FHUDWidgetContextHandle& ContextHandle)
 {
 	if (UHUDWidgetContextSubsystem* Subsystem = UHUDWidgetContextSubsystem::Get(UserWidget))
@@ -107,7 +117,17 @@ void UHUDLayoutBlueprintLibrary::SetWidgetContext_FromHandle(UUserWidget* UserWi
 	}
 }
 
+void UHUDLayoutBlueprintLibrary::InitializeWidget_FromHandle(UUserWidget* UserWidget, const FHUDWidgetContextHandle& ContextHandle)
+{
+	InitializeWidgetFromContextHandle(UserWidget, ContextHandle);
+}
+
 void UHUDLayoutBlueprintLibrary::InitializeWidgetFromHandle(UUserWidget* UserWidget, const FHUDWidgetContextHandle& ContextHandle)
+{
+	InitializeWidgetFromContextHandle(UserWidget, ContextHandle);
+}
+
+void UHUDLayoutBlueprintLibrary::InitializeWidgetFromContextHandle(UUserWidget* UserWidget, const FHUDWidgetContextHandle& ContextHandle)
 {
 	if (UHUDWidgetContextSubsystem* Subsystem = UHUDWidgetContextSubsystem::Get(UserWidget))
 	{
@@ -205,7 +225,7 @@ DEFINE_FUNCTION(UHUDLayoutBlueprintLibrary::execK2_InitializeWidget)
 	}
 	
 	const FHUDWidgetContextHandle ContextHandle{ContextType, ContextData};
-	InitializeWidgetFromHandle(UserWidget, ContextHandle);
+	InitializeWidgetFromContextHandle(UserWidget, ContextHandle);
 	P_NATIVE_END
 }
 
@@ -325,6 +345,17 @@ UObject* UHUDLayoutBlueprintLibrary::GetContextObject_WidgetContext(const FHUDWi
 
 	const FHUDWidgetContext& Context = WidgetContext.GetContext<FHUDWidgetContext>();
 	return Context.ContextObject;
+}
+
+const UObject* UHUDLayoutBlueprintLibrary::GetDataObject_WidgetContext(const FHUDWidgetContextHandle& WidgetContext)
+{
+	if (!WidgetContext.IsValid())
+	{
+		return nullptr;
+	}
+
+	const FHUDWidgetContext& Context = WidgetContext.GetContext<FHUDWidgetContext>();
+	return Context.DataObject;
 }
 
 bool UHUDLayoutBlueprintLibrary::IsValid_SlotHandle(FHUDLayoutSlotHandle& Handle)

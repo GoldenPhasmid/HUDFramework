@@ -92,8 +92,6 @@ void SIndicatorCanvas::Construct(const FArguments& InArgs, const FLocalPlayerCon
 	CategoryTags = InCategoryTags;
 	ArrowBrush = InArrowBrush;
 
-	IndicatorPool.SetWorld(LocalPlayerContext.GetWorld());
-
 	SetCanTick(false);
 	SetVisibility(EVisibility::SelfHitTestInvisible);
 	
@@ -285,13 +283,13 @@ void SIndicatorCanvas::HandleIndicatorAdded(const TSharedRef<FIndicatorDescripto
 	{
 		if (const TSharedPtr<FIndicatorDescriptorInstance> SharedInstance = WeakInstance.Pin())
 		{
-			UUserWidget* IndicatorWidget = IndicatorPool.GetOrCreateInstance(
+			UUserWidget* IndicatorWidget = IndicatorPool->GetOrCreateInstance(
 				TSubclassOf<UUserWidget>(IndicatorWidgetClass.Get()),
 			[this, SharedInstance](UUserWidget* UserWidget)
 			{
 				if (WidgetContextSubsystem.IsValid())
 				{
-					WidgetContextSubsystem->InitializeWidget_FromHUDWidgetPool(IndicatorPool, UserWidget, SharedInstance->WidgetContext);
+					WidgetContextSubsystem->InitializeWidget_FromHUDWidgetPool(*IndicatorPool, UserWidget, SharedInstance->WidgetContext);
 				}
 			});
 
@@ -333,7 +331,7 @@ void SIndicatorCanvas::HandleIndicatorRemoved(const TSharedRef<FIndicatorDescrip
 					IIndicatorWidgetInterface::Execute_ResetIndicator(IndicatorWidget.Get());
 				}
 
-				IndicatorPool.Release(IndicatorWidget.Get());
+				IndicatorPool->Release(IndicatorWidget.Get());
 			}
 			else
 			{
@@ -388,7 +386,7 @@ void SIndicatorCanvas::SetShowAnyIndicators(bool InValue)
 void SIndicatorCanvas::OnIndicatorManagerChanged()
 {
 	// World may have changed
-	IndicatorPool.SetWorld(LocalPlayerContext.GetWorld());
+	IndicatorPool->SetWorld(LocalPlayerContext.GetWorld());
 
 	IndicatorManager->OnIndicatorAdded.AddSP(this, &SIndicatorCanvas::HandleIndicatorAdded);
 	IndicatorManager->OnIndicatorRemoved.AddSP(this, &SIndicatorCanvas::HandleIndicatorRemoved);

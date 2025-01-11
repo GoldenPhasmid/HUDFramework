@@ -186,6 +186,12 @@ public:
 	virtual FChildren* GetChildren() override { return &AllChildren; };
 	// ~End SWidget Interface
 
+	void SetWidgetPool(FHUDWidgetPool* InPool)
+	{
+		IndicatorPool = InPool;
+		IndicatorPool->SetWorld(LocalPlayerContext.GetWorld());
+	}
+
 	FIntPoint MinClampPadding = FIntPoint(10, 10);
 
 protected:
@@ -251,11 +257,9 @@ private:
 	TPanelChildren<FSlot> SlotChildren;
 	TPanelChildren<FArrowSlot> ArrowChildren;
 	FCombinedChildren AllChildren;
-	
-	FHUDWidgetPool IndicatorPool;
 
 	FLocalPlayerContext LocalPlayerContext;
-
+	FHUDWidgetPool* IndicatorPool = nullptr;
 	const FSlateBrush* ArrowBrush = nullptr;
 
 	FGameplayTagContainer CategoryTags;

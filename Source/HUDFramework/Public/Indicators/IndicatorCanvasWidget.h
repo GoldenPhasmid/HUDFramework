@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "GameplayTagContainer.h"
+#include "HUDWidgetPool.h"
 #include "Components/Widget.h"
 #include "IndicatorCanvasWidget.generated.h"
 
@@ -31,5 +32,8 @@ public:
 	FSlateBrush ArrowBrush;
 
 protected:
+	UPROPERTY(Transient)
+	FHUDWidgetPool WidgetPool;
+	
 	TSharedPtr<SIndicatorCanvas> IndicatorCanvas;
 };

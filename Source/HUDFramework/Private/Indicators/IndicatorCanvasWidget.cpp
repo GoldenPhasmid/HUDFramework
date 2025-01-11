@@ -13,6 +13,7 @@ void UIndicatorCanvasWidget::ReleaseSlateResources(bool bReleaseChildren)
 	Super::ReleaseSlateResources(bReleaseChildren);
 
 	IndicatorCanvas.Reset();
+	WidgetPool.ResetPool();
 }
 
 TSharedRef<SWidget> UIndicatorCanvasWidget::RebuildWidget()
@@ -29,6 +30,7 @@ TSharedRef<SWidget> UIndicatorCanvasWidget::RebuildWidget()
 	if (ensureAlwaysMsgf(LocalPlayer != nullptr, TEXT("%s: Attempt to rebuild with invalid LocalPlayer!"), *FString(__FUNCTION__)))
 	{
 		IndicatorCanvas = SNew(SIndicatorCanvas, FLocalPlayerContext(LocalPlayer), CategoryTags, &ArrowBrush);
+		IndicatorCanvas->SetWidgetPool(&WidgetPool);
 		return IndicatorCanvas.ToSharedRef();
 	}
 

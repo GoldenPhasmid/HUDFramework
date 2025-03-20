@@ -15,21 +15,21 @@ struct FHUDExtensionData
 	TArray<FHUDLayoutExtensionHandle> ExtensionHandles;
 };
 
-struct FHUDLayoutContextData: public FGameFeatureContextData
+struct FHUDLayoutContextData: public FGameExperienceActionState
 {
 	TMap<AActor*, FHUDExtensionData> ActiveExtensions;
 };
 
-TSharedPtr<FGameFeatureContextData> UGameFeatureAction_AddHUDLayout::CreateContextData() const
+TSharedPtr<FGameExperienceActionState> UGameFeatureAction_AddHUDLayout::CreateActionState() const
 {
 	return MakeShared<FHUDLayoutContextData>();
 }
 
-void UGameFeatureAction_AddHUDLayout::AddToWorld(const FWorldContext& WorldContext, const FGameFeatureStateChangeContext& ChangeContext)
+void UGameFeatureAction_AddHUDLayout::AddToWorld(const FWorldContext& WorldContext, const FGameFeatureStateChangeContext& ChangeContext) const
 {
 	Super::AddToWorld(WorldContext, ChangeContext);
 
-	FPerContextData& ContextData = ActiveContexts.FindOrAdd(ChangeContext);
+	FPerWorldContextData& ContextData = ActiveContexts.FindChecked(ChangeContext);
 	check(ContextData.ExtensionRequests.IsEmpty());
 
 	const UGameInstance* GameInstance = WorldContext.OwningGameInstance;
@@ -41,12 +41,12 @@ void UGameFeatureAction_AddHUDLayout::AddToWorld(const FWorldContext& WorldConte
 	}
 }
 
-void UGameFeatureAction_AddHUDLayout::RemoveFromWorld(const FGameFeatureStateChangeContext& ChangeContext)
+void UGameFeatureAction_AddHUDLayout::RemoveFromWorld(const FWorldContext& WorldContext, const FGameFeatureStateChangeContext& ChangeContext) const
 {
-	FPerContextData& ContextData = ActiveContexts.FindChecked(ChangeContext);
+	FPerWorldContextData& ContextData = ActiveContexts.FindChecked(ChangeContext);
 
 	ContextData.ExtensionRequests.Empty();
-	FHUDLayoutContextData& LayoutData = ContextData.GetContextData<FHUDLayoutContextData>();
+	FHUDLayoutContextData& LayoutData = ContextData.GetActionState<FHUDLayoutContextData>();
 	for (auto& [Actor, ActorExtensions]: LayoutData.ActiveExtensions)
 	{
 		const AHUD* HUD = CastChecked<AHUD>(Actor);
@@ -54,7 +54,7 @@ void UGameFeatureAction_AddHUDLayout::RemoveFromWorld(const FGameFeatureStateCha
 	}
 	LayoutData.ActiveExtensions.Empty();
 
-	Super::RemoveFromWorld(ChangeContext);
+	Super::RemoveFromWorld(WorldContext, ChangeContext);
 }
 
 #if WITH_EDITOR
@@ -72,10 +72,10 @@ void UGameFeatureAction_AddHUDLayout::AddAdditionalAssetBundleData(FAssetBundleD
 }
 #endif
 
-void UGameFeatureAction_AddHUDLayout::HandleActorExtension(AActor* Actor, FName Event, FGameFeatureStateChangeContext Context)
+void UGameFeatureAction_AddHUDLayout::HandleActorExtension(AActor* Actor, FName Event, FGameFeatureStateChangeContext Context) const
 {
 	check(Actor);
-	FHUDLayoutContextData& ContextData = ActiveContexts.FindChecked(Context).GetContextData<FHUDLayoutContextData>();
+	FHUDLayoutContextData& ContextData = GetActionState<FHUDLayoutContextData>(Context);
 
 	const AHUD* HUD = CastChecked<AHUD>(Actor);
 	APlayerController* PlayerController = HUD->GetOwningPlayerController();
@@ -92,7 +92,7 @@ void UGameFeatureAction_AddHUDLayout::HandleActorExtension(AActor* Actor, FName 
 	}
 }
 
-void UGameFeatureAction_AddHUDLayout::AddWidgets(const APlayerController* PlayerController, FHUDExtensionData& ExtensionData)
+void UGameFeatureAction_AddHUDLayout::AddWidgets(const APlayerController* PlayerController, FHUDExtensionData& ExtensionData) const
 {
 	check(PlayerController);
 	UHUDLayoutSubsystem* LayoutSubsystem = PlayerController->GetGameInstance()->GetSubsystem<UHUDLayoutSubsystem>();
@@ -120,7 +120,7 @@ void UGameFeatureAction_AddHUDLayout::AddWidgets(const APlayerController* Player
 	}
 }
 
-void UGameFeatureAction_AddHUDLayout::RemoveWidgets(const APlayerController* PlayerController, FHUDExtensionData& ExtensionData)
+void UGameFeatureAction_AddHUDLayout::RemoveWidgets(const APlayerController* PlayerController, FHUDExtensionData& ExtensionData) const
 {
 	check(PlayerController);
 	UHUDLayoutSubsystem* LayoutSubsystem = PlayerController->GetGameInstance()->GetSubsystem<UHUDLayoutSubsystem>();

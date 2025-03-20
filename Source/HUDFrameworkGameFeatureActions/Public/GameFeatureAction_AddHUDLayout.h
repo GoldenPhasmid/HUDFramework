@@ -45,18 +45,18 @@ class HUDFRAMEWORKGAMEFEATUREACTIONS_API UGameFeatureAction_AddHUDLayout: public
 public:
 
 	//~Begin GameFeatureAction_WorldActionBase interface
-	virtual TSharedPtr<FGameFeatureContextData> CreateContextData() const override;
-	virtual void AddToWorld(const FWorldContext& WorldContext, const FGameFeatureStateChangeContext& ChangeContext) override;
-	virtual void RemoveFromWorld(const FGameFeatureStateChangeContext& ChangeContext) override;
+	virtual TSharedPtr<FGameExperienceActionState> CreateActionState() const override;
+	virtual void AddToWorld(const FWorldContext& WorldContext, const FGameFeatureStateChangeContext& ChangeContext) const override;
+	virtual void RemoveFromWorld(const FWorldContext& WorldContext, const FGameFeatureStateChangeContext& ChangeContext) const override;
 #if WITH_EDITOR
 	virtual void AddAdditionalAssetBundleData(FAssetBundleData& AssetBundleData) override;
 #endif
 	//~End GameFeatureAction_WorldActionBase interface
 	
 protected:
-	void HandleActorExtension(AActor* Actor, FName Event, FGameFeatureStateChangeContext Context);
-	void AddWidgets(const APlayerController* PlayerController, FHUDExtensionData& ExtensionData);
-	void RemoveWidgets(const APlayerController* PlayerController, FHUDExtensionData& ExtensionData);
+	void HandleActorExtension(AActor* Actor, FName Event, FGameFeatureStateChangeContext Context) const;
+	void AddWidgets(const APlayerController* PlayerController, FHUDExtensionData& ExtensionData) const;
+	void RemoveWidgets(const APlayerController* PlayerController, FHUDExtensionData& ExtensionData) const;
 
 	UPROPERTY(EditAnywhere, meta = (TitleProperty = "{LayoutClass} -> {LayerTag}"))
 	TArray<FHUDLayoutEntry> Layouts;

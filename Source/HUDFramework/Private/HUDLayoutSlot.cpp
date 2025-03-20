@@ -1,6 +1,7 @@
 ﻿#include "HUDLayoutSlot.h"
 
 #include "HUDLayoutExtension.h"
+#include "HUDLayoutSubsystem.h"
 #include "Blueprint/UserWidget.h"
 
 FHUDLayoutSlot::FHUDLayoutSlot(const FGameplayTag& InSlotTag, const ULocalPlayer* InLocalPlayer, TSlotCallback&& InAddCallback, TSlotCallback&& InRemoveCallback)

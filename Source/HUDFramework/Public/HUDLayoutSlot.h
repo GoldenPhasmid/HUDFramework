@@ -4,8 +4,10 @@
 
 #include "HUDLayoutSlot.generated.h"
 
-class ULocalPlayer;
+
 struct FHUDLayoutExtensionHandle;
+struct FHUDLayoutExtensionRequest;
+class ULocalPlayer;
 class FHUDLayoutExtension;
 class UHUDLayoutSubsystem;
 
@@ -38,14 +40,14 @@ public:
 		return Slot.IsValid();
 	}
 
-	friend FORCEINLINE bool operator==(const FHUDLayoutSlotHandle& Lhs, const FHUDLayoutSlotHandle& Rhs)
+	bool operator==(const FHUDLayoutSlotHandle& Other) const
 	{
-		return Lhs.Slot == Rhs.Slot;
+		return Slot == Other.Slot;
 	}
 	
-	friend FORCEINLINE bool operator!=(const FHUDLayoutSlotHandle& Lhs, const FHUDLayoutSlotHandle& Rhs)
+	bool operator!=(const FHUDLayoutSlotHandle& Other) const
 	{
-		return Lhs.Slot != Rhs.Slot;
+		return Slot != Other.Slot;
 	}
 	
 	friend FORCEINLINE uint32 GetTypeHash(const FHUDLayoutSlotHandle& Handle)

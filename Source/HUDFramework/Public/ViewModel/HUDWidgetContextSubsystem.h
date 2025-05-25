@@ -7,6 +7,7 @@
 
 #include "HUDWidgetContextSubsystem.generated.h"
 
+class UHUDWidgetContextExtension;
 struct FUserWidgetPool;
 struct FHUDWidgetPool;
 class FHUDLayoutExtension;
@@ -100,7 +101,7 @@ protected:
 	/** run widget context initialization for widget tree, starting with @UserWidget */
 	void InitializeWidgetTree(UUserWidget* UserWidget);
 	/** initialize single @UserWidget */
-	void InitializeWidgetInternal(UUserWidget* UserWidget);
+	void InitializeWidgetInternal(UUserWidget* UserWidget, UHUDWidgetContextExtension* Extension);
 
 	/**
 	 * @return true if @UserWidget is part of currently initializing widget tree aka is going to match one of @ActiveWidgetTrees

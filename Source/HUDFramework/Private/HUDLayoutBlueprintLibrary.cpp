@@ -16,6 +16,8 @@ FString UHUDLayoutBlueprintLibrary::ConstructWidgetTreeString(const UUserWidget*
 {
 	FString Result = GetNameSafe(UserWidget);
 
+#if !UE_BUILD_SHIPPING && !UE_BUILD_TEST
+	// create string from a full widget tree path
 	const UWidget* CurrentWidget = UserWidget;
 	while (CurrentWidget && CurrentWidget->GetOuter())
 	{
@@ -25,6 +27,7 @@ FString UHUDLayoutBlueprintLibrary::ConstructWidgetTreeString(const UUserWidget*
 			Result += TEXT(" -> ") + GetNameSafe(CurrentUserWidget);
 		}
 	}
+#endif
 
 	return Result;
 }

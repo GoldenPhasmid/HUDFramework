@@ -110,7 +110,7 @@ PRAGMA_ENABLE_DEPRECATION_WARNINGS
 
 	// widget pool is a special case of widget initialization
 	// WidgetContextExtension might already been created and initialized, same for viewmodel sources
-	// out target is to properly "deinitialize" ViewModel and binding sources(in InitializeWidgetInternal) and "initialize" them again (again InitializeWidgetInternal)
+	// out target is to properly "deinitialize" ViewModel resources and "initialize" them again (@see InitializeWidgetInternal)
 	// Widgets that are used in widget pool shouldn't rely on Construct/Destruct calls anyway
 	if (UHUDWidgetContextExtension* Extension = UserWidget->GetExtension<UHUDWidgetContextExtension>())
 	{
@@ -235,7 +235,7 @@ void UHUDWidgetContextSubsystem::InitializeWidgetTree(UUserWidget* UserWidget)
 	check(UserWidget);
 	SCOPE_CYCLE_COUNTER(STAT_HUD_Framework_InitializeWidgetTree);
 	
-	TArray<UUserWidget*> WidgetsToInitialize;
+	TArray<UUserWidget*, TInlineAllocator<80>> WidgetsToInitialize;
 	WidgetsToInitialize.Add(UserWidget);
 	
 	check(ActiveWidgetTrees.Contains(UserWidget) == false);
@@ -256,12 +256,13 @@ void UHUDWidgetContextSubsystem::InitializeWidgetTree(UUserWidget* UserWidget)
 		UHUDWidgetContextExtension* Extension = CurrentWidget->GetExtension<UHUDWidgetContextExtension>();
 		if (Extension != nullptr && Extension->IsInitialized())
 		{
-			const FString WidgetTree = UHUDLayoutBlueprintLibrary::ConstructWidgetTreeString(CurrentWidget);
-			UE_LOG(LogHUDFramework, Error, TEXT("%s Trying to double initialize widget extension.\nWidget Tree: %s"), *FString(__FUNCTION__), *WidgetTree);
-			continue;	
+			// widget was created and initialized during InitializeWidgetTree call
+			// if extension is initialized, it means CurrentWidget and its widget tree are initialized as well. Skip it
+			UE_LOG(LogHUDFramework, Verbose, TEXT("Widget [%s] is already initialized. Skipping widget tree initialization."), *GetNameSafe(CurrentWidget));
+			return;	
 		}
-		
-		InitializeWidgetInternal(CurrentWidget);
+
+		InitializeWidgetInternal(CurrentWidget, Extension);
 		
 		const UWidgetTree* WidgetTree = CurrentWidget->WidgetTree;
 		check(WidgetTree);
@@ -276,7 +277,7 @@ void UHUDWidgetContextSubsystem::InitializeWidgetTree(UUserWidget* UserWidget)
 	}
 }
 
-void UHUDWidgetContextSubsystem::InitializeWidgetInternal(UUserWidget* UserWidget)
+void UHUDWidgetContextSubsystem::InitializeWidgetInternal(UUserWidget* UserWidget, UHUDWidgetContextExtension* Extension)
 {
 	SCOPE_CYCLE_COUNTER(STAT_HUD_Framework_InitializeWidget);
 
@@ -304,7 +305,7 @@ void UHUDWidgetContextSubsystem::InitializeWidgetInternal(UUserWidget* UserWidge
 		View->InitializeSources();
 	}
 
-	if (UHUDWidgetContextExtension* Extension = UserWidget->GetExtension<UHUDWidgetContextExtension>())
+	if (Extension != nullptr)
 	{
 		check(!Extension->IsInitialized());
 		Extension->SetInitialized(true);

@@ -50,7 +50,7 @@ void FHUDWidgetPool::Release(UUserWidget* Widget)
 	}
 }
 
-void FHUDWidgetPool::Release(TArray<UUserWidget*> Widgets)
+void FHUDWidgetPool::Release(TConstArrayView<UUserWidget*> Widgets)
 {
 	for (int32 Index = Widgets.Num() - 1; Index >= 0; --Index)
 	{

@@ -51,7 +51,7 @@ public:
 	void AddReferencedObjects(FReferenceCollector& Collector);
 
 	bool IsInitialized() const { return OwningWidget.IsValid() || OwningWorld.IsValid(); }
-	const TArray<UUserWidget*>& GetActiveWidgets() const { return ActiveWidgets; }
+	TConstArrayView<UUserWidget*> GetActiveWidgets() const { return ActiveWidgets; }
 
 	/**
 	 * Gets an instance of a widget of the given class.
@@ -96,7 +96,7 @@ public:
 	void Release(UUserWidget* Widget);
 
 	/** Return a widget object to the pool, allowing it to be reused in the future. Slate widget is ALWAYS destroyed */
-	void Release(TArray<UUserWidget*> Widgets);
+	void Release(TConstArrayView<UUserWidget*> Widgets);
 
 	/** Returns all active widget UObjects to the inactive pool. ALWAYS destroys all cached underlying slate widgets. */
 	void ReleaseAll();

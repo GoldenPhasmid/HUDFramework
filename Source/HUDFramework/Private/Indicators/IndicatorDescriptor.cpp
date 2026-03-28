@@ -1,1 +1,0 @@
-﻿#include "Indicators/IndicatorDescriptor.h"

@@ -2,10 +2,10 @@
 
 #include "HUDWidgetContext.h"
 #include "Components/GameStateComponent.h"
-#include "IndicatorManagerComponent.generated.h"
+#include "HUDIndicatorManagerComponent.generated.h"
 
 struct FHUDWidgetContextHandle;
-class UIndicatorDescriptor;
+class UHUDIndicatorDescriptor;
 
 USTRUCT(BlueprintType)
 struct HUDFRAMEWORK_API FIndicatorDescriptorInstance
@@ -13,7 +13,7 @@ struct HUDFRAMEWORK_API FIndicatorDescriptorInstance
 	GENERATED_BODY()
 
 	FIndicatorDescriptorInstance() = default;
-	FIndicatorDescriptorInstance(const UIndicatorDescriptor* InDescriptor, const USceneComponent* InComponent, FName InSocketName, const FHUDWidgetContextHandle& InWidgetContext)
+	FIndicatorDescriptorInstance(const UHUDIndicatorDescriptor* InDescriptor, const USceneComponent* InComponent, FName InSocketName, const FHUDWidgetContextHandle& InWidgetContext)
 		: Descriptor(InDescriptor)
 		, Component(InComponent)
 		, SocketName(InSocketName)
@@ -21,7 +21,7 @@ struct HUDFRAMEWORK_API FIndicatorDescriptorInstance
 	{}
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<const UIndicatorDescriptor> Descriptor;
+	TObjectPtr<const UHUDIndicatorDescriptor> Descriptor;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<const USceneComponent> Component;
@@ -36,12 +36,12 @@ struct HUDFRAMEWORK_API FIndicatorDescriptorInstance
 DECLARE_MULTICAST_DELEGATE_OneParam(FIndicatorDelegate, const TSharedRef<FIndicatorDescriptorInstance>&);
 
 UCLASS(BlueprintType)
-class HUDFRAMEWORK_API UIndicatorManagerComponent : public UGameStateComponent
+class HUDFRAMEWORK_API UHUDIndicatorManagerComponent : public UGameStateComponent
 {
 	GENERATED_BODY()
 	
 public:
-	UIndicatorManagerComponent(const FObjectInitializer& Initializer);
+	UHUDIndicatorManagerComponent(const FObjectInitializer& Initializer);
 
 	static void AddReferencedObjects(UObject* InThis, FReferenceCollector& Collector);
 	
@@ -50,16 +50,16 @@ public:
 	// ~End ActorComponent Interface
 
 	UFUNCTION(BlueprintCallable, Category = "Components", DisplayName = "Get Indicator Manager Component", meta = (WorldContext = "WorldContextObject", DefaultToSelf = "WorldContextObject"))
-	static UIndicatorManagerComponent* Get(const UObject* WorldContextObject);
+	static UHUDIndicatorManagerComponent* Get(const UObject* WorldContextObject);
 
 	FIndicatorDelegate OnIndicatorAdded;
 	FIndicatorDelegate OnIndicatorRemoved;
 	
-	void AddIndicator(const UIndicatorDescriptor* Descriptor, const AActor* OwnerActor);
-	void AddIndicator(const UIndicatorDescriptor* Descriptor, const USceneComponent* Component, FName SocketName = NAME_None);
+	void AddIndicator(const UHUDIndicatorDescriptor* Descriptor, const AActor* OwnerActor);
+	void AddIndicator(const UHUDIndicatorDescriptor* Descriptor, const USceneComponent* Component, FName SocketName = NAME_None);
 	
-	void AddIndicatorWithContext(const UIndicatorDescriptor* Descriptor, const AActor* OwnerActor, const FHUDWidgetContextHandle& WidgetContext);
-	void AddIndicatorWithContext(const UIndicatorDescriptor* Descriptor, const USceneComponent* Component, FName SocketName, const FHUDWidgetContextHandle& WidgetContext);
+	void AddIndicatorWithContext(const UHUDIndicatorDescriptor* Descriptor, const AActor* OwnerActor, const FHUDWidgetContextHandle& WidgetContext);
+	void AddIndicatorWithContext(const UHUDIndicatorDescriptor* Descriptor, const USceneComponent* Component, FName SocketName, const FHUDWidgetContextHandle& WidgetContext);
 
 	void RemoveIndicators(const AActor* OwnerActor);
 	void RemoveIndicators(const USceneComponent* Component);

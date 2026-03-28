@@ -1,11 +1,11 @@
 ﻿#pragma once
 
-#include "IndicatorProjectionMode.h"
+#include "HUDIndicatorProjectionMode.h"
 
 #include "WorldLocationProjectionModes.generated.h"
 
 UCLASS(DisplayName = "Component Point")
-class UIndicatorProjectionMode_ComponentPoint : public UIndicatorProjectionMode
+class UIndicatorProjectionMode_ComponentPoint : public UHUDIndicatorProjectionMode
 {
 	GENERATED_BODY()
 
@@ -22,7 +22,7 @@ public:
 };
 
 UCLASS(DisplayName = "Component Bounding Box")
-class UIndicatorProjectionMode_ComponentBoundingBox : public UIndicatorProjectionMode
+class UIndicatorProjectionMode_ComponentBoundingBox : public UHUDIndicatorProjectionMode
 {
 	GENERATED_BODY()
 

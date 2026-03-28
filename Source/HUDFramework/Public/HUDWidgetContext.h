@@ -60,7 +60,7 @@ struct HUDFRAMEWORK_API FHUDWidgetContextHandle
 		, ContextType(Other.ContextType)
 	{}
 
-	template <typename TContextType = FHUDWidgetContextProxy, TEMPLATE_REQUIRES(TIsDerivedFrom<TContextType, FHUDWidgetContextProxy>::IsDerived)>
+	template <typename TContextType = FHUDWidgetContextProxy UE_REQUIRES(TIsDerivedFrom<TContextType, FHUDWidgetContextProxy>::IsDerived)>
 	explicit FHUDWidgetContextHandle(const TSharedRef<TContextType>& Context)
 		: ContextData(Context)
 		, ContextType(TBaseStructure<TContextType>::Get())
@@ -87,13 +87,13 @@ struct HUDFRAMEWORK_API FHUDWidgetContextHandle
 	}
 
 	/** */
-	template <typename TContextType, TEMPLATE_REQUIRES(TIsDerivedFrom<TContextType, FHUDWidgetContextProxy>::IsDerived)>
+	template <typename TContextType UE_REQUIRES(TIsDerivedFrom<TContextType, FHUDWidgetContextProxy>::IsDerived)>
 	FORCEINLINE bool IsA() const
 	{
 		return IsA(TBaseStructure<TContextType>::Get());
 	}
 
-	template <typename TContextType, TEMPLATE_REQUIRES(TIsDerivedFrom<TContextType, FHUDWidgetContextProxy>::IsDerived)>
+	template <typename TContextType UE_REQUIRES(TIsDerivedFrom<TContextType, FHUDWidgetContextProxy>::IsDerived)>
 	FORCEINLINE bool IsDerivedFrom() const
 	{
 		return IsDerivedFrom(TBaseStructure<TContextType>::Get());
@@ -185,7 +185,7 @@ struct HUDFRAMEWORK_API FHUDWidgetContextContainer
 {
 	GENERATED_BODY()
 
-	template<typename TContextType, typename TPred, TEMPLATE_REQUIRES(TIsDerivedFrom<TContextType, FHUDWidgetContextProxy>::Value)>
+	template<typename TContextType, typename TPred UE_REQUIRES(TIsDerivedFrom<TContextType, FHUDWidgetContextProxy>::Value)>
 	void ForEachContext(TPred&& Callable) const
 	{
 		for (const FHUDWidgetContextHandle& Handle : ContextHandles)

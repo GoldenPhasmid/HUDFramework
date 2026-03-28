@@ -3,13 +3,13 @@
 #include "AsyncMixin.h"
 #include "GameplayTagContainer.h"
 #include "HUDWidgetPool.h"
-#include "IndicatorDescriptor.h"
-#include "IndicatorManagerComponent.h"
-#include "IndicatorProjectionMode.h"
+#include "HUDIndicatorDescriptor.h"
+#include "HUDIndicatorManagerComponent.h"
+#include "HUDIndicatorProjectionMode.h"
 #include "Blueprint/UserWidgetPool.h"
 
 class UHUDWidgetContextSubsystem;
-class UIndicatorManagerComponent;
+class UHUDIndicatorManagerComponent;
 struct FIndicatorDescriptorInstance;
 
 
@@ -131,7 +131,7 @@ public:
 
 		FORCEINLINE float GetIndicatorScale() const
 		{
-			const UIndicatorDescriptor* Descriptor = IndicatorDescriptorInstance->Descriptor;
+			const UHUDIndicatorDescriptor* Descriptor = IndicatorDescriptorInstance->Descriptor;
 			check(Descriptor != nullptr);
 
 			if (Descriptor->bEnableScaling && Descriptor->ScaleCurve != nullptr)
@@ -267,7 +267,7 @@ private:
 	bool bShowAnyIndicators = false;
 
 	TWeakObjectPtr<UHUDWidgetContextSubsystem> WidgetContextSubsystem;
-	TWeakObjectPtr<UIndicatorManagerComponent> IndicatorManager;
+	TWeakObjectPtr<UHUDIndicatorManagerComponent> IndicatorManager;
 
 	TSharedPtr<FActiveTimerHandle> TickHandle;
 };

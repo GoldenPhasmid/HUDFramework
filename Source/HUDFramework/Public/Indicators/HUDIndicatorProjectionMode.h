@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "IndicatorProjectionMode.generated.h"
+#include "HUDIndicatorProjectionMode.generated.h"
 
 struct HUDFRAMEWORK_API FIndicatorProjectionResult
 {
@@ -11,7 +11,7 @@ struct HUDFRAMEWORK_API FIndicatorProjectionResult
 };
 
 UCLASS(Abstract, BlueprintType, DefaultToInstanced, EditInlineNew)
-class HUDFRAMEWORK_API UIndicatorProjectionMode : public UObject
+class HUDFRAMEWORK_API UHUDIndicatorProjectionMode : public UObject
 {
 	GENERATED_BODY()
 	

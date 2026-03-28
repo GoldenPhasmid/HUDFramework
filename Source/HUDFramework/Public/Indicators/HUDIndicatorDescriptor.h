@@ -1,15 +1,15 @@
 ﻿#pragma once
 
 #include "GameplayTagContainer.h"
-#include "IndicatorDescriptor.generated.h"
+#include "HUDIndicatorDescriptor.generated.h"
 
-class UIndicatorProjectionMode;
+class UHUDIndicatorProjectionMode;
 
 /*
  * Data asset that describes common behavior for all indicators of certain type
  */
 UCLASS(BlueprintType)
-class HUDFRAMEWORK_API UIndicatorDescriptor : public UDataAsset
+class HUDFRAMEWORK_API UHUDIndicatorDescriptor : public UDataAsset
 {
 	GENERATED_BODY()
 	
@@ -19,7 +19,7 @@ public:
 	FGameplayTag CategoryTag;
 	
 	UPROPERTY(EditDefaultsOnly, Instanced, BlueprintReadOnly, Category = "Indicator", meta = (Validate))
-	TObjectPtr<UIndicatorProjectionMode> ProjectionMode;
+	TObjectPtr<UHUDIndicatorProjectionMode> ProjectionMode;
 
 	/* Widget that will be created for this indicator */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Indicator", meta = (Validate))

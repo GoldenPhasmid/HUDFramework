@@ -3,17 +3,17 @@
 #include "GameplayTagContainer.h"
 #include "HUDWidgetPool.h"
 #include "Components/Widget.h"
-#include "IndicatorCanvasWidget.generated.h"
+#include "HUDIndicatorCanvasWidget.generated.h"
 
 class SIndicatorCanvas;
 
 UCLASS()
-class HUDFRAMEWORK_API UIndicatorCanvasWidget : public UWidget
+class HUDFRAMEWORK_API UHUDIndicatorCanvasWidget : public UWidget
 {
 	GENERATED_BODY()
 	
 public:
-	UIndicatorCanvasWidget(const FObjectInitializer& Initializer);
+	UHUDIndicatorCanvasWidget(const FObjectInitializer& Initializer);
 	
 	// ~Begin UVisual Interface
 	virtual void ReleaseSlateResources(bool bReleaseChildren) override;

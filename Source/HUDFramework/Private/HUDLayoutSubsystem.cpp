@@ -73,24 +73,6 @@ void UHUDLayoutSubsystem::Deinitialize()
 	Super::Deinitialize();
 }
 
-void UHUDLayoutSubsystem::AddReferencedObjects(UObject* InThis, FReferenceCollector& Collector)
-{
-	UHUDLayoutSubsystem* LayoutSubsystem = CastChecked<UHUDLayoutSubsystem>(InThis);
-
-#if 0
-	for (auto& [Tag, ExtensionArray]: LayoutSubsystem->ActiveExtensions)
-	{
-		for (const TSharedPtr<FHUDLayoutExtension>& Extension: ExtensionArray)
-		{
-			if (Extension->DataPayload != nullptr)
-			{
-				Collector.AddReferencedObject(Extension->DataPayload);
-			}
-		}
-	}
-#endif
-}
-
 FHUDLayoutSlotHandle UHUDLayoutSubsystem::RegisterLayoutSlot(const FGameplayTag& SlotTag, const ULocalPlayer* LocalPlayer, TSlotCallback AddCallback, TSlotCallback RemoveCallback)
 {
 	if (!SlotTag.IsValid())

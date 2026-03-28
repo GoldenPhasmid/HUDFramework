@@ -1,14 +1,14 @@
-﻿#include "Indicators/IndicatorCanvasWidget.h"
+﻿#include "Indicators/HUDIndicatorCanvasWidget.h"
 
 #include "Indicators/IndicatorCanvas.h"
 
-UIndicatorCanvasWidget::UIndicatorCanvasWidget(const FObjectInitializer& Initializer) : Super(Initializer)
+UHUDIndicatorCanvasWidget::UHUDIndicatorCanvasWidget(const FObjectInitializer& Initializer) : Super(Initializer)
 {
 	bIsVariable = true;
 	SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 }
 
-void UIndicatorCanvasWidget::ReleaseSlateResources(bool bReleaseChildren)
+void UHUDIndicatorCanvasWidget::ReleaseSlateResources(bool bReleaseChildren)
 {
 	Super::ReleaseSlateResources(bReleaseChildren);
 
@@ -16,7 +16,7 @@ void UIndicatorCanvasWidget::ReleaseSlateResources(bool bReleaseChildren)
 	WidgetPool.ResetPool();
 }
 
-TSharedRef<SWidget> UIndicatorCanvasWidget::RebuildWidget()
+TSharedRef<SWidget> UHUDIndicatorCanvasWidget::RebuildWidget()
 {
 #if WITH_EDITOR
 	if (IsDesignTime())

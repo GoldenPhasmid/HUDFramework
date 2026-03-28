@@ -1,9 +1,9 @@
 ﻿#include "Indicators/IndicatorCanvas.h"
 
 #include "HUDFramework.h"
-#include "Indicators/IndicatorDescriptor.h"
-#include "Indicators/IndicatorManagerComponent.h"
-#include "Indicators/IndicatorWidgetInterface.h"
+#include "Indicators/HUDIndicatorDescriptor.h"
+#include "Indicators/HUDIndicatorManagerComponent.h"
+#include "Indicators/HUDIndicatorWidgetInterface.h"
 #include "ViewModel/HUDWidgetContextSubsystem.h"
 
 // Hope this namespace helps understand code better
@@ -228,7 +228,7 @@ EActiveTimerReturnType SIndicatorCanvas::UpdateCanvas(double InCurrentTime, floa
 
 	if (!IndicatorManager.IsValid())
 	{
-		IndicatorManager = UIndicatorManagerComponent::Get(LocalPlayerContext.GetWorld());
+		IndicatorManager = UHUDIndicatorManagerComponent::Get(LocalPlayerContext.GetWorld());
 
 		// New indicator manager found.
 		if (IndicatorManager.IsValid())
@@ -293,9 +293,9 @@ void SIndicatorCanvas::HandleIndicatorAdded(const TSharedRef<FIndicatorDescripto
 				}
 			});
 
-			if (IndicatorWidget->Implements<UIndicatorWidgetInterface>())
+			if (IndicatorWidget->Implements<UHUDIndicatorWidgetInterface>())
 			{
-				IIndicatorWidgetInterface::Execute_SetIndicator(IndicatorWidget, SharedInstance->Descriptor, SharedInstance->Component);
+				IHUDIndicatorWidgetInterface::Execute_SetIndicator(IndicatorWidget, SharedInstance->Descriptor, SharedInstance->Component);
 			}
 
 			AddIndicatorSlot(SharedInstance.ToSharedRef(), IndicatorWidget)
@@ -326,9 +326,9 @@ void SIndicatorCanvas::HandleIndicatorRemoved(const TSharedRef<FIndicatorDescrip
 			const TWeakObjectPtr<UUserWidget> IndicatorWidget = SlotChildren[Index].GetUserWidget();
 			if (IndicatorWidget.IsValid())
 			{
-				if (IndicatorWidget->GetClass()->ImplementsInterface(UIndicatorWidgetInterface::StaticClass()))
+				if (IndicatorWidget->GetClass()->ImplementsInterface(UHUDIndicatorWidgetInterface::StaticClass()))
 				{
-					IIndicatorWidgetInterface::Execute_ResetIndicator(IndicatorWidget.Get());
+					IHUDIndicatorWidgetInterface::Execute_ResetIndicator(IndicatorWidget.Get());
 				}
 
 				IndicatorPool->Release(IndicatorWidget.Get());
@@ -569,7 +569,7 @@ Private::FSlotSizeAndOffset::FSlotSizeAndOffset(const SIndicatorCanvas::FSlot& I
 	
 	// Grab box from FSlot. Conversation from TSharedRef, object must be valid
 	Size = IndicatorSlot.GetWidget()->GetDesiredSize() * Scale;
-	const UIndicatorDescriptor* Descriptor = IndicatorSlot.GetIndicatorDescriptorInstance()->Descriptor;
+	const UHUDIndicatorDescriptor* Descriptor = IndicatorSlot.GetIndicatorDescriptorInstance()->Descriptor;
 
 	switch (Descriptor->HorizontalAlignment)
 	{

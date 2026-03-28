@@ -1,16 +1,18 @@
-﻿#include "Indicators/IndicatorManagerComponent.h"
+﻿#include "Indicators/HUDIndicatorManagerComponent.h"
 
 #include "HUDFramework.h"
-#include "Indicators/IndicatorBlueprintLibrary.h"
-#include "Indicators/IndicatorDescriptor.h"
+#include "Indicators/HUDIndicatorBlueprintLibrary.h"
+#include "Indicators/HUDIndicatorDescriptor.h"
 
-UIndicatorManagerComponent::UIndicatorManagerComponent(const FObjectInitializer& Initializer) : Super(Initializer)
+UHUDIndicatorManagerComponent::UHUDIndicatorManagerComponent(const FObjectInitializer& Initializer) : Super(Initializer)
 {
 }
 
-void UIndicatorManagerComponent::AddReferencedObjects(UObject* InThis, FReferenceCollector& Collector)
+void UHUDIndicatorManagerComponent::AddReferencedObjects(UObject* InThis, FReferenceCollector& Collector)
 {
-	UIndicatorManagerComponent* This = CastChecked<UIndicatorManagerComponent>(InThis);
+	Super::AddReferencedObjects(InThis, Collector);
+	
+	UHUDIndicatorManagerComponent* This = CastChecked<UHUDIndicatorManagerComponent>(InThis);
 
 	for (TSharedPtr<FIndicatorDescriptorInstance> Instance: This->IndicatorInstances)
 	{
@@ -21,7 +23,7 @@ void UIndicatorManagerComponent::AddReferencedObjects(UObject* InThis, FReferenc
 	}
 }
 
-void UIndicatorManagerComponent::OnUnregister()
+void UHUDIndicatorManagerComponent::OnUnregister()
 {
 	Super::OnUnregister();
 
@@ -37,7 +39,7 @@ void UIndicatorManagerComponent::OnUnregister()
 	OnIndicatorRemoved.Clear();
 }
 
-UIndicatorManagerComponent* UIndicatorManagerComponent::Get(const UObject* WorldContextObject)
+UHUDIndicatorManagerComponent* UHUDIndicatorManagerComponent::Get(const UObject* WorldContextObject)
 {
 	if (!IsValid(WorldContextObject))
 	{
@@ -46,22 +48,22 @@ UIndicatorManagerComponent* UIndicatorManagerComponent::Get(const UObject* World
 	
 	const UWorld* World = GEngine->GetWorldFromContextObjectChecked(WorldContextObject);
 	const AGameStateBase* GameState = World->GetGameState();
-	return IsValid(GameState) ? GameState->FindComponentByClass<UIndicatorManagerComponent>(): nullptr;
+	return IsValid(GameState) ? GameState->FindComponentByClass<UHUDIndicatorManagerComponent>(): nullptr;
 }
 
-void UIndicatorManagerComponent::AddIndicator(const UIndicatorDescriptor* Descriptor, const AActor* OwnerActor)
+void UHUDIndicatorManagerComponent::AddIndicator(const UHUDIndicatorDescriptor* Descriptor, const AActor* OwnerActor)
 {
 	// create context anyway with Descriptor as a data object
 	AddIndicatorWithContext(Descriptor, OwnerActor, FHUDWidgetContextHandle::CreateContext<FIndicatorWidgetContext>(nullptr, Descriptor));
 }
 
-void UIndicatorManagerComponent::AddIndicator(const UIndicatorDescriptor* Descriptor, const USceneComponent* Component, FName SocketName)
+void UHUDIndicatorManagerComponent::AddIndicator(const UHUDIndicatorDescriptor* Descriptor, const USceneComponent* Component, FName SocketName)
 {
 	// create context anyway with Descriptor as a data object
 	AddIndicatorWithContext(Descriptor, Component, SocketName, FHUDWidgetContextHandle::CreateContext<FIndicatorWidgetContext>(nullptr, Descriptor));
 }
 
-void UIndicatorManagerComponent::AddIndicatorWithContext(const UIndicatorDescriptor* Descriptor, const AActor* OwnerActor, const FHUDWidgetContextHandle& WidgetContext)
+void UHUDIndicatorManagerComponent::AddIndicatorWithContext(const UHUDIndicatorDescriptor* Descriptor, const AActor* OwnerActor, const FHUDWidgetContextHandle& WidgetContext)
 {
 	if (!IsValid(OwnerActor) || Descriptor == nullptr)
 	{
@@ -74,7 +76,7 @@ void UIndicatorManagerComponent::AddIndicatorWithContext(const UIndicatorDescrip
 }
 
 
-void UIndicatorManagerComponent::AddIndicatorWithContext(const UIndicatorDescriptor* Descriptor, const USceneComponent* Component, FName SocketName, const FHUDWidgetContextHandle& WidgetContext)
+void UHUDIndicatorManagerComponent::AddIndicatorWithContext(const UHUDIndicatorDescriptor* Descriptor, const USceneComponent* Component, FName SocketName, const FHUDWidgetContextHandle& WidgetContext)
 {
 	if (!IsValid(Component) || Descriptor == nullptr)
 	{
@@ -86,7 +88,7 @@ void UIndicatorManagerComponent::AddIndicatorWithContext(const UIndicatorDescrip
 	AddIndicatorInternal(NewInstance);
 }
 
-void UIndicatorManagerComponent::AddIndicatorInternal(TSharedPtr<FIndicatorDescriptorInstance> Instance)
+void UHUDIndicatorManagerComponent::AddIndicatorInternal(TSharedPtr<FIndicatorDescriptorInstance> Instance)
 {
 	check(!IndicatorInstances.Contains(Instance));
 	
@@ -94,7 +96,7 @@ void UIndicatorManagerComponent::AddIndicatorInternal(TSharedPtr<FIndicatorDescr
 	OnIndicatorAdded.Broadcast(Instance.ToSharedRef());
 }
 
-void UIndicatorManagerComponent::RemoveIndicators(const AActor* OwnerActor)
+void UHUDIndicatorManagerComponent::RemoveIndicators(const AActor* OwnerActor)
 {
 	for (auto It = IndicatorInstances.CreateIterator(); It; ++It)
 	{
@@ -107,7 +109,7 @@ void UIndicatorManagerComponent::RemoveIndicators(const AActor* OwnerActor)
 	}
 }
 
-void UIndicatorManagerComponent::RemoveIndicators(const USceneComponent* Component)
+void UHUDIndicatorManagerComponent::RemoveIndicators(const USceneComponent* Component)
 {
 	for (auto It = IndicatorInstances.CreateIterator(); It; ++It)
     {

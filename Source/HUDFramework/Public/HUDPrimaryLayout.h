@@ -3,7 +3,9 @@
 #include "CoreMinimal.h"
 #include "CommonUserWidget.h"
 #include "GameplayTagContainer.h"
+#include "HUDFramework.h"
 #include "HUDWidgetContext.h"
+#include "NativeGameplayTags.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 #include "Widgets/CommonActivatableWidgetContainer.h"
@@ -12,6 +14,11 @@
 
 struct FHUDWidgetContextHandle;
 class UCommonActivatableWidgetContainerBase;
+
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_HUD_Layer_Game);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_HUD_Layer_GameMenu);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_HUD_Layer_Menu);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_HUD_Layer_Modal);
 
 /**
  * Primary layout (root widget) of the whole game.
@@ -86,13 +93,14 @@ public:
 	template <typename TActivatableWidget>
 	TActivatableWidget* PushWidgetToLayer(FGameplayTag LayerTag, TSubclassOf<TActivatableWidget> WidgetClass)
 	{
-		check(bAddWidgetGuard == false);
+		checkf(bAddWidgetGuard == false, TEXT("trying to add another activatable widget in the same callstack."));
 		if (UCommonActivatableWidgetContainerBase* Layer = GetLayerWidget(LayerTag))
 		{
 			TGuardValue Guard{bAddWidgetGuard, true};
 			return Layer->AddWidget<TActivatableWidget>(WidgetClass);
 		}
 
+		UE_LOG(LogHUDFramework, Error, TEXT("Failed to push widget %s to layer %s, layer is not registered."), *WidgetClass->GetName(), *LayerTag.ToString());
 		return nullptr;
 	}
 
@@ -100,20 +108,21 @@ public:
 	template <typename TActivatableWidget>
 	TActivatableWidget* PushWidgetToLayer(FGameplayTag LayerTag, TSubclassOf<TActivatableWidget> WidgetClass, TFunction<void(TActivatableWidget&)> InitFunc)
 	{
-		check(bAddWidgetGuard == false);
+		checkf(bAddWidgetGuard == false, TEXT("trying to add another activatable widget in the same callstack."));
 		if (UCommonActivatableWidgetContainerBase* Layer = GetLayerWidget(LayerTag))
 		{
 			TGuardValue Guard{bAddWidgetGuard, true};
 			return Layer->AddWidget<TActivatableWidget>(WidgetClass, InitFunc);
 		}
-		
+
+		UE_LOG(LogHUDFramework, Error, TEXT("Failed to push widget %s to layer %s, layer is not registered."), *WidgetClass->GetName(), *LayerTag.ToString());
 		return nullptr;
 	}
 
 	template <typename TActivatableWidget>
 	TActivatableWidget* PushWidgetToLayer(FGameplayTag LayerTag, TSubclassOf<TActivatableWidget> WidgetClass, const FHUDWidgetContextHandle& WidgetContext)
 	{
-		check(bAddWidgetGuard == false);
+		checkf(bAddWidgetGuard == false, TEXT("trying to add another activatable widget in the same callstack."));
 		if (UCommonActivatableWidgetContainerBase* Layer = GetLayerWidget(LayerTag))
 		{
 			TGuardValue Guard{bAddWidgetGuard, true};
@@ -125,7 +134,8 @@ public:
 
 			return Widget;
 		}
-		
+
+		UE_LOG(LogHUDFramework, Error, TEXT("Failed to push widget %s to layer %s, layer is not registered."), *WidgetClass->GetName(), *LayerTag.ToString());
 		return nullptr;
 	}
 
@@ -147,9 +157,8 @@ public:
 	void UnregisterLayer(UPARAM(meta = (Categories = "HUD.Layer")) FGameplayTag LayerTag);
 
 	void InitActivatableWidget(UCommonActivatableWidget& NewWidget);
-	
 protected:
-
+	
 	/** Context for a widget currently being added to the layer */
 	FHUDWidgetContextHandle ActiveContext;
 	bool bAddWidgetGuard;

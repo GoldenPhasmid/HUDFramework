@@ -3,8 +3,14 @@
 #include "CommonActivatableWidget.h"
 #include "GameplayTagContainer.h"
 #include "HUDFramework.h"
+#include "NativeGameplayTags.h"
 #include "ViewModel/HUDWidgetContextSubsystem.h"
 #include "Widgets/CommonActivatableWidgetContainer.h"
+
+UE_DEFINE_GAMEPLAY_TAG(TAG_HUD_Layer_Game,		"HUD.Layer.Game");
+UE_DEFINE_GAMEPLAY_TAG(TAG_HUD_Layer_GameMenu,	"HUD.Layer.GameMenu");
+UE_DEFINE_GAMEPLAY_TAG(TAG_HUD_Layer_Menu,		"HUD.Layer.Menu");
+UE_DEFINE_GAMEPLAY_TAG(TAG_HUD_Layer_Modal,		"HUD.Layer.Modal");
 
 void UHUDPrimaryLayout::PopWidget(UCommonActivatableWidget* Widget)
 {
@@ -82,8 +88,6 @@ void UHUDPrimaryLayout::UnregisterLayer(FGameplayTag LayerTag)
 
 void UHUDPrimaryLayout::InitActivatableWidget(UCommonActivatableWidget& NewWidget)
 {
-	check(bAddWidgetGuard == true);
-
 	if (ActiveContext.IsValid())
 	{
 		if (UHUDWidgetContextSubsystem* Subsystem = UHUDWidgetContextSubsystem::Get(this))

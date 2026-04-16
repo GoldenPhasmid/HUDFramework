@@ -36,6 +36,7 @@ void UGameFeatureAction_AddHUDLayout::AddToWorld(const FWorldContext& WorldConte
 	if (UGameFrameworkComponentManager* Manager = UGameInstance::GetSubsystem<UGameFrameworkComponentManager>(GameInstance))
 	{
 		auto Delegate = UGameFrameworkComponentManager::FExtensionHandlerDelegate::CreateUObject(this, &ThisClass::HandleActorExtension, ChangeContext);
+		// @TODO: AHUD should be modular otherwise we crash on clients
 		auto Handle = Manager->AddExtensionHandler(AHUD::StaticClass(), Delegate);
 		ContextData.ExtensionRequests.Add(Handle);
 	}
